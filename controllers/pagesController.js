@@ -90,6 +90,31 @@ const PagesController = {
         return res.redirect('/login');
       }
 
+      // Fetch order statistics
+      const { Order } = require('../db');
+      const userOrders = await Order.find({ userId: req.session.userId });
+      
+      // Calculate statistics
+      const totalOrders = userOrders.length;
+      const totalSpent = userOrders
+        .filter(order => order.paymentStatus === 'paid')
+        .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      
+      // Active rentals = orders where rental period includes today or status is 'active'
+      const today = new Date();
+      const activeRentals = userOrders.filter(order => {
+        if (order.status === 'completed' || order.status === 'cancelled') {
+          return false;
+        }
+        if (order.rentalPeriod && order.rentalPeriod.startDate && order.rentalPeriod.endDate) {
+          const startDate = new Date(order.rentalPeriod.startDate);
+          const endDate = new Date(order.rentalPeriod.endDate);
+          return today >= startDate && today <= endDate;
+        }
+        return order.status === 'active';
+      }).length;
+      const memberSince = user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear();
+
       // Get success message from session if it exists
       const successMessage = req.session.successMessage || null;
       delete req.session.successMessage; // Clear it after retrieval
@@ -98,7 +123,13 @@ const PagesController = {
         title: 'JC Rentals - My Profile', 
         user,
         isLoggedIn: true,
-        successMessage
+        successMessage,
+        statistics: {
+          totalOrders,
+          totalSpent: parseFloat(totalSpent).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+          activeRentals,
+          memberSince
+        }
       });
     } catch (err) {
       console.error('Profile fetch error:', err);
@@ -159,32 +190,23 @@ const PagesController = {
     }
 
     try {
+      const user = await User.findById(req.session.userId);
+      if (!user) {
+        req.session.destroy();
+        return res.redirect('/login');
+      }
       const orders = await Order.find({ userId: req.session.userId }).sort({ createdAt: -1 });
       
       res.render('orders', { 
         title: 'JC Rentals - My Orders',
+        user,
         orders: orders || [],
         isLoggedIn: true 
       });
     } catch (err) {
       console.error('Orders fetch error:', err);
-      res.render('orders', { 
-        title: 'JC Rentals - My Orders',
-        orders: [],
-        isLoggedIn: true,
-        error: 'Error loading orders'
-      });
+      res.redirect('/login');
     }
-  },
-
-  /**
-   * Billing page (protected)
-   */
-  getBilling: (req, res) => {
-    if (!req.session.userId) {
-      return res.redirect('/login');
-    }
-    res.render('billing', { title: 'JC Rentals - Billing', isLoggedIn: true });
   },
 
   /**

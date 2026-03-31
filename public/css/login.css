@@ -124,16 +124,17 @@
 
 .input-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.input-wrap i {
+.input-wrap > i:first-child {
   position: absolute;
   left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #B7E35A;
   font-size: 0.95em;
   pointer-events: none;
+  z-index: 1;
 }
 
 .input-wrap input,
@@ -163,8 +164,6 @@
 .pwd-toggle {
   position: absolute;
   right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
   background: none;
   border: none;
   color: #B7E35A;
@@ -382,7 +381,7 @@
     padding: 10px 12px 10px 36px;
   }
 
-  .input-wrap i {
+  .input-wrap > i:first-child {
     left: 12px;
     font-size: 0.9em;
   }

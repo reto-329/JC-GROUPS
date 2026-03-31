@@ -42,7 +42,6 @@ router.get('/api/check-email', AuthController.checkEmail);
 router.get('/profile', requireLogin, PagesController.getProfile);
 router.post('/profile/update', requireLogin, PagesController.postUpdateProfile);
 router.get('/orders', requireLogin, PagesController.getOrders);
-router.get('/billing', requireLogin, PagesController.getBilling);
 router.get('/security', requireLogin, PagesController.getSecurity);
 router.post('/security/change-password', requireLogin, PagesController.postChangePassword);
 

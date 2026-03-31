@@ -133,16 +133,40 @@ const AdminPagesController = {
 
     try {
       const admin = await Admin.findById(req.session.adminId);
-      
+      const Order = require('../models/Order');
+
+      const orders = await Order.find()
+        .populate('userId', 'firstName lastName email')
+        .sort({ createdAt: -1 })
+        .lean();
+
       res.render('admin/orders', {
         title: 'JC Rentals - Manage Orders',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
-        isAdminLoggedIn: true
+        isAdminLoggedIn: true,
+        orders
       });
     } catch (err) {
       console.error('Orders page error:', err);
       res.redirect('/admin/login');
+    }
+  },
+
+  /**
+   * Delete Order
+   */
+  deleteOrder: async (req, res) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    try {
+      const Order = require('../models/Order');
+      await Order.findByIdAndDelete(req.params.id);
+      res.json({ success: true, message: 'Order deleted successfully' });
+    } catch (err) {
+      console.error('Delete order error:', err);
+      res.status(500).json({ success: false, message: 'Error deleting order' });
     }
   },
 

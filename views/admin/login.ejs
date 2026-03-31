@@ -6,6 +6,266 @@
   <title>Admin Login - JC Rentals</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="/css/admin.css">
+  <style>
+    /* Responsive Login Page */
+    html {
+      overflow-x: hidden;
+      width: 100%;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      overflow-x: hidden;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .login-panel-orb {
+      will-change: auto;
+      animation: none !important;
+    }
+
+    @media (max-width: 1024px) {
+      .login-split {
+        min-height: auto;
+        flex-direction: column;
+      }
+      .login-panel {
+        padding: 50px 40px;
+        min-height: auto;
+      }
+      .login-form-panel {
+        width: 100%;
+        flex-shrink: 1;
+        padding: 40px 30px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .login-split {
+        flex-direction: column;
+        min-height: auto;
+      }
+      .login-panel {
+        padding: 40px 30px;
+        min-height: auto;
+      }
+      .login-panel-inner {
+        max-width: 100%;
+      }
+      .login-panel-inner h1 {
+        font-size: 28px;
+      }
+      .login-panel-inner > p {
+        font-size: 14px;
+      }
+      .login-features li {
+        font-size: 13px;
+        gap: 10px;
+      }
+      .login-features li i {
+        font-size: 14px;
+      }
+      .login-form-panel {
+        width: 100%;
+        padding: 35px 25px;
+      }
+      .login-form-inner {
+        max-width: 100%;
+      }
+      .login-form-header {
+        margin-bottom: 28px;
+      }
+      .login-form-header h2 {
+        font-size: 24px;
+      }
+      .login-badge {
+        font-size: 11px;
+        padding: 4px 10px;
+        margin-bottom: 14px;
+      }
+      .admin-login-form .form-group {
+        margin-bottom: 16px;
+      }
+      .admin-login-form label {
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      .admin-login-form .input-wrap input {
+        padding: 11px 40px 11px 38px !important;
+        font-size: 13px;
+        box-sizing: border-box;
+      }
+      .admin-login-btn {
+        padding: 12px;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      .login-note {
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      html {
+        overflow-x: hidden;
+      }
+      
+      body {
+        font-size: 14px;
+        overflow-x: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .login-split {
+        flex-direction: column;
+        min-height: 100vh;
+        width: 100%;
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .login-panel {
+        padding: 25px 15px;
+        min-height: auto;
+        width: 100%;
+        overflow-x: hidden;
+      }
+      
+      .login-brand-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 26px;
+        margin-bottom: 20px;
+      }
+      
+      .login-panel-inner h1 {
+        font-size: 24px;
+        margin-bottom: 12px;
+      }
+      
+      .login-panel-inner > p {
+        font-size: 13px;
+        margin-bottom: 28px;
+        line-height: 1.5;
+      }
+      
+      .login-features {
+        gap: 10px;
+      }
+      
+      .login-features li {
+        font-size: 12px;
+        gap: 8px;
+      }
+      
+      .login-features li i {
+        font-size: 13px;
+      }
+      
+      .login-panel-orb { 
+        display: none !important;
+      }
+      
+      .login-form-panel {
+        width: 100%;
+        padding: 20px 15px;
+        min-height: auto;
+        overflow-x: hidden;
+      }
+      
+      .login-form-inner {
+        max-width: 100%;
+      }
+      
+      .login-form-header {
+        margin-bottom: 20px;
+      }
+      
+      .login-form-header h2 {
+        font-size: 20px;
+        margin-bottom: 4px;
+      }
+      
+      .login-form-header p {
+        font-size: 13px;
+      }
+      
+      .login-badge {
+        font-size: 10px;
+        padding: 3px 8px;
+        margin-bottom: 12px;
+      }
+      
+      .alert {
+        padding: 10px 12px;
+        font-size: 12px;
+        margin-bottom: 16px;
+        gap: 8px;
+        overflow-x: hidden;
+      }
+      
+      .admin-login-form {
+        margin-bottom: 16px;
+      }
+      
+      .admin-login-form .form-group {
+        margin-bottom: 14px;
+      }
+      
+      .admin-login-form label {
+        font-size: 11px;
+        margin-bottom: 5px;
+      }
+      
+      .admin-login-form .input-wrap {
+        position: relative;
+        width: 100%;
+        overflow-x: hidden;
+      }
+      
+      .admin-login-form .input-wrap > i:first-child {
+        font-size: 13px;
+        left: 12px;
+      }
+      
+      .admin-login-form .input-wrap input {
+        padding: 10px 36px 10px 36px !important;
+        font-size: 12px;
+        border-radius: 6px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      .pwd-toggle {
+        right: 10px;
+        font-size: 13px;
+        padding: 3px;
+      }
+      
+      .admin-login-btn {
+        padding: 11px;
+        border-radius: 6px;
+        font-size: 13px;
+        gap: 6px;
+        margin-top: 6px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      .login-note {
+        font-size: 10px;
+        gap: 4px;
+      }
+    }
+  </style>
 </head>
 <body class="admin-login-page">
   <div class="login-split">

@@ -2,25 +2,25 @@
   background: linear-gradient(135deg, rgba(47, 79, 74, 0.95) 0%, rgba(31, 57, 53, 0.95) 100%), url('/images/bannerBG.png');
   background-size: cover;
   background-position: center;
-  padding: clamp(60px, 12vw, 100px) 2rem;
+  padding: clamp(30px, 5vw, 60px) 2rem;
   text-align: center;
   color: #fff;
-  min-height: 300px;
+  min-height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .orders-hero h1 {
-  font-size: clamp(2em, 8vw, 4em);
+  font-size: clamp(1.6em, 5vw, 2.8em);
   font-weight: 900;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   letter-spacing: 1px;
   font-family: 'Tungsten-Bold', sans-serif;
 }
 
 .orders-hero p {
-  font-size: clamp(1em, 2vw, 1.3em);
+  font-size: clamp(0.85em, 1.5vw, 1.1em);
   color: #B7E35A;
   margin: 0;
 }
@@ -336,5 +336,67 @@
   .action-btn {
     flex: 1;
     justify-content: center;
+  }
+
+  .orders-header {
+    margin-bottom: 2rem;
+  }
+
+  .orders-header h2 {
+    font-size: 1.5em;
+    margin-bottom: 1.25rem;
+  }
+
+  .filter-controls {
+    gap: 0.75rem;
+  }
+
+  .filter-btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.9em;
+  }
+
+  .order-card {
+    border-left: 3px solid #B7E35A;
+  }
+
+  .order-item {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .orders-header h2 {
+    font-size: 1.3em;
+  }
+
+  .filter-controls {
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85em;
+  }
+
+  .order-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .order-items {
+    padding: 1rem 1.5rem;
+  }
+
+  .order-footer {
+    padding: 1rem 1.5rem;
+  }
+
+  .order-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-btn {
+    width: 100%;
   }
 }

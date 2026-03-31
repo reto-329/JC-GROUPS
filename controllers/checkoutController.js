@@ -137,12 +137,19 @@ const CheckoutController = {
       }
 
       // Create order from cart
+      const startDate = cart.items[0]?.startDate;
+      const endDate = cart.items[0]?.endDate;
+      const rentalDays = startDate && endDate
+        ? Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24))
+        : 0;
+
       const order = new Order({
         userId: userId,
         items: cart.items,
         rentalPeriod: {
-          startDate: cart.items[0]?.startDate,
-          endDate: cart.items[0]?.endDate
+          startDate,
+          endDate,
+          days: rentalDays
         },
         totalAmount: total,
         status: 'confirmed',

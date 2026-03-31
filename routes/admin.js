@@ -87,6 +87,8 @@ router.put('/api/equipment/:id', requireAdminLogin, (req, res, next) => {
   next();
 }, AdminPagesController.updateEquipment);
 
+router.delete('/api/orders/:id', requireAdminLogin, AdminPagesController.deleteOrder);
+
 router.delete('/api/equipment/:id', requireAdminLogin, AdminPagesController.deleteEquipment);
 
 module.exports = router;

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/css/index.css">
   <link rel="stylesheet" href="/css/header.css">
   <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/profile.css">
   <link rel="stylesheet" href="/css/orders.css">
 </head>
 <body>
@@ -24,20 +25,26 @@
   </section>
 
   <!-- Orders Container -->
-  <main class="orders-container">
-    <!-- Filter Section -->
-    <div class="orders-header">
-      <h2>Your Rental Orders</h2>
-      <div class="filter-controls">
-        <button class="filter-btn active" data-filter="all">All Orders</button>
-        <button class="filter-btn" data-filter="active">Active</button>
-        <button class="filter-btn" data-filter="completed">Completed</button>
-        <button class="filter-btn" data-filter="cancelled">Cancelled</button>
-      </div>
-    </div>
+  <main class="profile-container">
+    <div class="profile-grid">
+      <!-- Sidebar Component -->
+      <%- include('partials/sidebar', { activeTab: 'orders', sidebarData: { title: 'My Orders', icon: 'fas fa-clipboard-list' } }) %>
 
-    <!-- Orders List -->
-    <div class="orders-list">
+      <!-- Main Content -->
+      <div class="profile-content">
+        <!-- Filter Section -->
+        <div class="orders-header">
+          <h2>Your Rental Orders</h2>
+          <div class="filter-controls">
+            <button class="filter-btn active" data-filter="all">All Orders</button>
+            <button class="filter-btn" data-filter="active">Active</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+          </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="orders-list">
       <% if (orders && orders.length > 0) { %>
         <% orders.forEach((order) => { %>
           <div class="order-card" data-status="<%= order.status %>">
@@ -107,6 +114,8 @@
           <a href="/equipment" class="browse-btn">Browse Equipment</a>
         </div>
       <% } %>
+        </div>
+      </div>
     </div>
   </main>
 
