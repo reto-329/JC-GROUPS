@@ -411,6 +411,13 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+@media (max-width: 480px) {
+  .admin-sidebar-footer {
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    padding-bottom: calc(12px + 50px);
+  }
+}
+
 .logout-btn {
   display: flex;
   align-items: center;
