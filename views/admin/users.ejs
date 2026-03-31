@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="JC Rentals Admin - User Management">
+  <title>Users Management - JC Rentals Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-users-page">
+  <div class="admin-wrapper">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <div class="admin-logo-mini">
+          <i class="fas fa-leaf"></i>
+        </div>
+        <h2>Admin Panel</h2>
+      </div>
+
+      <nav class="admin-nav">
+        <a href="/admin/dashboard" class="nav-item">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="/admin/users" class="nav-item active">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
+        </a>
+        <a href="/admin/equipment" class="nav-item">
+          <i class="fas fa-tools"></i>
+          <span>Equipment</span>
+        </a>
+        <a href="/admin/orders" class="nav-item">
+          <i class="fas fa-shopping-cart"></i>
+          <span>Orders</span>
+        </a>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <a href="/admin/logout" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Top Bar -->
+      <div class="admin-topbar">
+        <div class="topbar-left">
+          <button class="admin-hamburger" id="adminHamburger" aria-label="Toggle sidebar">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div>
+            <h1>User Management</h1>
+            <p class="breadcrumb">Dashboard / Users</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="admin-user-info">
+            <span class="admin-name"><%= adminName %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="content-header">
+          <h2>All Users</h2>
+          <p class="text-muted">Manage and monitor all registered users</p>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="management-toolbar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="userSearch" placeholder="Search users by name or email...">
+          </div>
+          <div class="filter-options">
+            <select id="statusFilter">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+          <table class="management-table">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Joined Date</th>
+                <th>Rentals</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr class="no-data">
+                <td colspan="8">
+                  <i class="fas fa-inbox"></i>
+                  <p>No users found. Check back later.</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <button class="page-btn prev-btn" disabled>
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <div class="page-info">
+            <span id="pageNumber">1</span> of <span id="totalPages">1</span>
+          </div>
+          <button class="page-btn next-btn">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- User Details Modal -->
+  <div id="userModal" class="admin-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>User Details</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="userModalBody">
+        <!-- Loaded dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="admin-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteMessage" style="font-size: 15px; color: var(--text-dark); margin: 20px 0;"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeDeleteModal()" style="margin-right: 10px;">Cancel</button>
+        <button class="btn-danger" id="confirmDeleteBtn" style="background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script id="usersJson" type="application/json"><%- JSON.stringify(users) %></script>
+  <script>
+    // Hamburger menu toggle
+    const hamburger = document.getElementById('adminHamburger');
+    const sidebar = document.querySelector('.admin-sidebar');
+
+    if (hamburger) {
+      hamburger.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        hamburger.classList.toggle('active');
+      });
+
+      // Close sidebar when clicking a nav item
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          sidebar.classList.remove('active');
+          hamburger.classList.remove('active');
+        });
+      });
+
+      // Close sidebar when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+          sidebar.classList.remove('active');
+          hamburger.classList.remove('active');
+        }
+      });
+    }
+
+    const usersData = JSON.parse(document.getElementById('usersJson').textContent);
+
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    function renderUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      
+      if (!usersData || usersData.length === 0) {
+        tbody.innerHTML = '<tr class="no-data"><td colspan="8"><i class="fas fa-inbox"></i><p>No users found.</p></td></tr>';
+        document.getElementById('totalPages').textContent = '1';
+        return;
+      }
+
+      const startIdx = (currentPage - 1) * itemsPerPage;
+      const endIdx = startIdx + itemsPerPage;
+      const pageUsers = usersData.slice(startIdx, endIdx);
+
+      tbody.innerHTML = pageUsers.map(user => `
+        <tr>
+          <td>#${user._id.toString().slice(-6).toUpperCase()}</td>
+          <td>${user.firstName} ${user.lastName}</td>
+          <td>${user.email}</td>
+          <td>${user.phone || 'N/A'}</td>
+          <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+          <td><span class="badge">${user.rentals || 0}</span></td>
+          <td><span class="status-badge ${user.status}">${user.status}</span></td>
+          <td>
+            <div class="action-buttons">
+              <button class="action-btn view-btn" onclick="viewUser('${user._id}')">
+                <i class="fas fa-eye"></i> View
+              </button>
+              <button class="action-btn delete-btn" onclick="deleteUser('${user._id}')">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      const totalPages = Math.ceil(usersData.length / itemsPerPage);
+      document.getElementById('totalPages').textContent = totalPages;
+      document.getElementById('pageNumber').textContent = currentPage;
+      
+      document.querySelector('.prev-btn').disabled = currentPage === 1;
+      document.querySelector('.next-btn').disabled = currentPage === totalPages;
+    }
+
+    function viewUser(userId) {
+      const user = usersData.find(u => u._id === userId);
+      if (!user) return;
+
+      const modalBody = document.getElementById('userModalBody');
+      modalBody.innerHTML = `
+        <div class="user-details">
+          <div class="detail-row">
+            <label>Name:</label>
+            <span>${user.firstName} ${user.lastName}</span>
+          </div>
+          <div class="detail-row">
+            <label>Email:</label>
+            <span>${user.email}</span>
+          </div>
+          <div class="detail-row">
+            <label>Phone:</label>
+            <span>${user.phone || 'Not provided'}</span>
+          </div>
+          <div class="detail-row">
+            <label>Address:</label>
+            <span>${user.address || 'Not provided'}</span>
+          </div>
+          <div class="detail-row">
+            <label>City:</label>
+            <span>${user.city || 'Not provided'}</span>
+          </div>
+          <div class="detail-row">
+            <label>State:</label>
+            <span>${user.state || 'Not provided'}</span>
+          </div>
+          <div class="detail-row">
+            <label>Zip Code:</label>
+            <span>${user.zipCode || 'Not provided'}</span>
+          </div>
+          <div class="detail-row">
+            <label>Joined:</label>
+            <span>${new Date(user.createdAt).toLocaleDateString()}</span>
+          </div>
+          <div class="detail-row">
+            <label>Active Rentals:</label>
+            <span>${user.rentals || 0}</span>
+          </div>
+          <div class="detail-row">
+            <label>Status:</label>
+            <span class="status-badge ${user.status}">${user.status}</span>
+          </div>
+        </div>
+      `;
+      document.getElementById('userModal').classList.add('active');
+    }
+
+    let userToDelete = null;
+
+    function deleteUser(userId) {
+      const user = usersData.find(u => u._id === userId);
+      if (!user) return;
+      
+      userToDelete = userId;
+      const deleteMessage = document.getElementById('deleteMessage');
+      deleteMessage.innerHTML = `Are you sure you want to delete <strong>${user.firstName} ${user.lastName}</strong> (${user.email})? This action cannot be undone.`;
+      document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('active');
+      userToDelete = null;
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+      if (userToDelete) {
+        document.getElementById('confirmDeleteBtn').disabled = true;
+        document.getElementById('confirmDeleteBtn').textContent = 'Deleting...';
+
+        try {
+          const response = await fetch(`/admin/api/users/${userToDelete}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Remove user from local data
+            const index = usersData.findIndex(u => u._id === userToDelete);
+            if (index > -1) {
+              usersData.splice(index, 1);
+            }
+            
+            // Refresh the table
+            renderUsers();
+            closeDeleteModal();
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 15px 20px; border-radius: 5px; z-index: 10000; font-weight: 600;';
+            successMsg.textContent = 'User deleted successfully';
+            document.body.appendChild(successMsg);
+            
+            setTimeout(() => successMsg.remove(), 3000);
+          } else {
+            alert('Error: ' + (data.message || 'Failed to delete user'));
+            document.getElementById('confirmDeleteBtn').disabled = false;
+            document.getElementById('confirmDeleteBtn').textContent = 'Delete';
+          }
+        } catch (err) {
+          console.error('Delete error:', err);
+          alert('Error deleting user: ' + err.message);
+          document.getElementById('confirmDeleteBtn').disabled = false;
+          document.getElementById('confirmDeleteBtn').textContent = 'Delete';
+        }
+      }
+    });
+
+    // Pagination controls
+    document.querySelector('.prev-btn').addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderUsers();
+      }
+    });
+
+    document.querySelector('.next-btn').addEventListener('click', () => {
+      const totalPages = Math.ceil(usersData.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderUsers();
+      }
+    });
+
+    // Modal controls
+    document.querySelectorAll('.modal-close').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('userModal').classList.remove('active');
+      });
+    });
+
+    // Initial render
+    renderUsers();
+  </script>
+</body>
+</html>

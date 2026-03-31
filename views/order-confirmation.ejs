@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Order Confirmation - JC Rentals">
+  <title>Order Confirmation - JC Rentals</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <style>
+    .confirmation-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .confirmation-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .success-icon {
+      font-size: 80px;
+      color: #28a745;
+      margin-bottom: 20px;
+      animation: scaleIn 0.6s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .confirmation-header h1 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .order-reference {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 8px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .order-reference h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .order-number {
+      font-size: 28px;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+    }
+
+    .order-reference p {
+      font-size: 14px;
+      opacity: 0.95;
+      margin: 5px 0;
+    }
+
+    .confirmation-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .confirmation-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-section {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 25px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rental-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .rental-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .item-dates {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .item-price {
+      font-weight: 600;
+      color: #007bff;
+      font-size: 16px;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      font-size: 14px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #666;
+      font-weight: 600;
+    }
+
+    .info-value {
+      color: #333;
+    }
+
+    .delivery-info {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+    }
+
+    .summary-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-left: 4px solid #007bff;
+    }
+
+    .total-amount {
+      font-size: 24px;
+      font-weight: 700;
+      color: #007bff;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 40px;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+      flex: 1;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .note-section {
+      background: #e7f3ff;
+      border-left: 4px solid #007bff;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #004085;
+    }
+
+    .note-section strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .timeline {
+      display: flex;
+      position: relative;
+      margin: 30px 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 50px;
+      bottom: 0;
+      width: 2px;
+      background: #e0e0e0;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 60px;
+      padding-bottom: 20px;
+    }
+
+    .timeline-item i {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 40px;
+      height: 40px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+      font-size: 16px;
+    }
+
+    .timeline-item.completed i {
+      border-color: #28a745;
+      color: #28a745;
+      background: #f1f9f6;
+    }
+
+    .timeline-item.pending i {
+      border-color: #ffc107;
+      color: #ffc107;
+      background: #fffbf0;
+    }
+
+    .timeline-label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 3px;
+    }
+
+    .timeline-date {
+      font-size: 13px;
+      color: #999;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .status-confirmed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-paid {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #997404;
+    }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <main class="confirmation-container">
+    <!-- Success Message -->
+    <div class="confirmation-header">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h1>Order Confirmed!</h1>
+      <p style="color: #666; font-size: 16px;">Thank you for your rental order. Your equipment rental has been successfully booked.</p>
+    </div>
+
+    <!-- Order Reference -->
+    <div class="order-reference">
+      <h2>ORDER NUMBER</h2>
+      <div class="order-number"><%= order.orderNumber %></div>
+      <p>Order Date: <%= new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></p>
+      <p>Confirmation has been sent to your email</p>
+    </div>
+
+    <!-- Order Details -->
+    <div class="confirmation-content">
+      <!-- Left Column: Items & Details -->
+      <div>
+        <!-- Rental Items -->
+        <div class="info-section">
+          <div class="section-title">
+            <i class="fas fa-box"></i> Rental Items
+          </div>
+          
+          <% order.items.forEach(function(item) { %>
+            <div class="rental-item">
+              <div class="item-details">
+                <div class="item-name"><%= item.equipmentName %></div>
+                <div class="item-dates">
+                  <i class="fas fa-calendar"></i>
+                  <%= new Date(item.startDate).toLocaleDateString() %> - 
+                  <%= new Date(item.endDate).toLocaleDateString() %>
+                </div>
+              </div>
+              <div class="item-price">
+                $<%= (item.subtotal || 0).toFixed(2) %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+
+        <!-- Delivery Information -->
+        <div class="info-section" style="margin-top: 20px;">
+          <div class="section-title">
+            <i class="fas fa-map-marker-alt"></i> Delivery Information
+          </div>
+          
+          <% if (order.deliveryAddress) { %>
+            <div class="delivery-info">
+              <div style="font-weight: 600; color: #333; margin-bottom: 10px;">
+                <i class="fas fa-home"></i> Delivery Address
+              </div>
+              <div style="font-size: 14px; color: #666; line-height: 1.6;">
+                <%= order.deliveryAddress.street %><br>
+                <%= order.deliveryAddress.city %>, <%= order.deliveryAddress.state %> <%= order.deliveryAddress.zipCode %>
+              </div>
+            </div>
+          <% } %>
+
+          <div class="info-row" style="margin-top: 15px;">
+            <div class="info-label">Expected Delivery</div>
+            <div class="info-value">
+              <%= new Date(order.rentalPeriod.startDate).toLocaleDateString() %>
+            </div>
+          </div>
+          
+          <div class="info-row">
+            <div class="info-label">Return Date</div>
+            <div class="info-value">
+              <%= new Date(order.rentalPeriod.endDate).toLocaleDateString() %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Status Timeline -->
+        <div class="info-section" style="margin-top: 20px;">
+          <div class="section-title">
+            <i class="fas fa-clock"></i> Order Status
+          </div>
+
+          <div class="timeline">
+            <div class="timeline-item completed">
+              <i class="fas fa-check"></i>
+              <div class="timeline-label">Order Confirmed</div>
+              <div class="timeline-date"><%= new Date(order.createdAt).toLocaleDateString() %></div>
+              <div class="status-badge status-confirmed">
+                <i class="fas fa-check-circle"></i> Confirmed
+              </div>
+            </div>
+
+            <div class="timeline-item completed">
+              <i class="fas fa-credit-card"></i>
+              <div class="timeline-label">Payment Received</div>
+              <div class="timeline-date"><%= new Date().toLocaleDateString() %></div>
+              <div class="status-badge status-paid">
+                <i class="fas fa-check-circle"></i> Paid
+              </div>
+            </div>
+
+            <div class="timeline-item pending">
+              <i class="fas fa-truck"></i>
+              <div class="timeline-label">Ready for Delivery</div>
+              <div class="timeline-date"><%= new Date(order.rentalPeriod.startDate).toLocaleDateString() %></div>
+              <div class="status-badge status-pending">
+                <i class="fas fa-clock"></i> Pending
+              </div>
+            </div>
+
+            <div class="timeline-item pending">
+              <i class="fas fa-redo"></i>
+              <div class="timeline-label">Return Expected</div>
+              <div class="timeline-date"><%= new Date(order.rentalPeriod.endDate).toLocaleDateString() %></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What's Next -->
+        <div class="note-section">
+          <strong><i class="fas fa-info-circle"></i> What's Next?</strong>
+          <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+            <li>We're preparing your equipment for delivery</li>
+            <li>You'll receive a confirmation email with tracking details</li>
+            <li>Equipment will be delivered on <%= new Date(order.rentalPeriod.startDate).toLocaleDateString() %></li>
+            <li>Please ensure someone is available to receive the delivery</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right Column: Summary -->
+      <div>
+        <!-- Order Summary -->
+        <div class="info-section summary-card">
+          <div class="section-title">
+            <i class="fas fa-receipt"></i> Order Summary
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Subtotal</div>
+            <div class="info-value">
+              $<%= (order.totalAmount * (100/113)).toFixed(2) %>
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">Delivery Fee</div>
+            <div class="info-value">$15.00</div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">HST (13%)</div>
+            <div class="info-value">
+              $<%= (order.totalAmount * (13/113)).toFixed(2) %>
+            </div>
+          </div>
+
+          <div class="total-amount">
+            $<%= order.totalAmount.toFixed(2) %>
+            <span style="font-size: 14px; color: #999;">CAD</span>
+          </div>
+        </div>
+
+        <!-- Customer Support -->
+        <div class="info-section" style="margin-top: 20px;">
+          <div class="section-title">
+            <i class="fas fa-headset"></i> Need Help?
+          </div>
+
+          <div style="font-size: 14px; color: #666; line-height: 1.8;">
+            <div style="margin-bottom: 15px;">
+              <strong>Email:</strong><br>
+              <a href="mailto:support@jcrentals.com" style="color: #007bff; text-decoration: none;">support@jcrentals.com</a>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+              <strong>Phone:</strong><br>
+              <a href="tel:1-800-RENTALS" style="color: #007bff; text-decoration: none;">1-800-RENTALS</a>
+            </div>
+
+            <div>
+              <strong>Hours:</strong><br>
+              Mon-Fri: 9AM-6PM EST<br>
+              Sat-Sun: 10AM-4PM EST
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="info-section" style="margin-top: 20px;">
+          <div class="section-title">
+            <i class="fas fa-link"></i> Quick Links
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="/orders" style="color: #007bff; text-decoration: none; font-size: 14px; font-weight: 600;">
+              <i class="fas fa-list"></i> View All Orders
+            </a>
+            <a href="/profile" style="color: #007bff; text-decoration: none; font-size: 14px; font-weight: 600;">
+              <i class="fas fa-user"></i> My Account
+            </a>
+            <a href="/equipment" style="color: #007bff; text-decoration: none; font-size: 14px; font-weight: 600;">
+              <i class="fas fa-tools"></i> Browse More Equipment
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <a href="/orders" class="btn btn-primary">
+        <i class="fas fa-list"></i> View My Orders
+      </a>
+      <a href="/" class="btn btn-secondary">
+        <i class="fas fa-home"></i> Back to Home
+      </a>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    // Log confirmation view (optional analytics)
+    console.log('Order confirmed:', '<%= order._id %>');
+    
+    // Optional: Print order details
+    function printOrder() {
+      window.print();
+    }
+  </script>
+
+</body>
+</html>

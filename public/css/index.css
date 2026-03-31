@@ -1,0 +1,934 @@
+/* ---------- CUSTOM FONTS ---------- */
+@font-face {
+  font-family: 'LatoWeb';
+  src: url('https://therentalguys.ca/assets/css/fonts/Lato-Regular.ttf') format('truetype');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'LatoWebBold';
+  src: url('https://therentalguys.ca/assets/css/fonts/Lato-Bold.ttf') format('truetype');
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Tungsten-Bold';
+  src: url('https://therentalguys.ca/assets/Tungsten-Bold.ttf') format('truetype');
+  font-weight: bold; font-style: normal; font-display: swap;
+}
+
+/* ---------- RESET & GLOBAL ---------- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'LatoWeb', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #555;
+  line-height: 1.6;
+  background: #fff;
+  overflow-x: hidden;
+}
+a { color: #2F4F4A; text-decoration: none; transition: color 0.3s; }
+a:hover { color: #B7E35A; }
+img { max-width: 100%; height: auto; display: block; }
+
+/* ---------- BUTTONS ---------- */
+.btn-primary {
+  display: inline-block;
+  background: #B7E35A;
+  color: #fff !important;
+  padding: clamp(12px, 2vw, 14px) clamp(24px, 4vw, 36px);
+  border-radius: 6px;
+  font-family: 'LatoWebBold', sans-serif;
+  font-size: clamp(0.8em, 1.5vw, 0.95em);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: background 0.3s, transform 0.2s;
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover { background: #2F4F4A; transform: translateY(-2px); color: #fff !important; }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid #fff;
+  color: #fff !important;
+  padding: clamp(11px, 2vw, 13px) clamp(20px, 3.5vw, 32px);
+  border-radius: 6px;
+  font-family: 'LatoWebBold', sans-serif;
+  font-size: clamp(0.8em, 1.5vw, 0.95em);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+.btn-outline:hover { background: #fff; color: #2F4F4A !important; }
+
+.btn-outline-dark {
+  display: inline-block;
+  border: 2px solid #fff;
+  color: #fff !important;
+  padding: clamp(11px, 2vw, 13px) clamp(20px, 3.5vw, 32px);
+  border-radius: 6px;
+  font-family: 'LatoWebBold', sans-serif;
+  font-size: clamp(0.8em, 1.5vw, 0.95em);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+.btn-outline-dark:hover { background: #fff; color: #2F4F4A !important; }
+
+/* ---------- SECTION HELPERS ---------- */
+.section-eyebrow {
+  font-size: clamp(0.7em, 1.5vw, 0.85em);
+  font-family: 'LatoWebBold', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #B7E35A;
+  margin-bottom: 10px;
+}
+.section-eyebrow.light { color: #B7E35A; }
+.section-header { text-align: center; margin-bottom: 50px; }
+.section-header h2 {
+  font-family: 'Tungsten-Bold', sans-serif;
+  font-size: clamp(1.8em, 6vw, 3em);
+  color: #2F4F4A;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  line-height: 1.1;
+}
+.underline {
+  width: 80px; height: 4px;
+  background: linear-gradient(90deg, #B7E35A, #2F4F4A);
+  border-radius: 2px;
+  margin: 16px auto 0;
+}
+.underline.left { margin: 16px 0 0; }
+
+/* ---------- HERO SEARCH SECTION (exact from original) ---------- */
+.s01 {
+  min-height: 340px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('https://therentalguys.ca/assets/images/homeBannerBG.png') center center no-repeat;
+  background-size: cover;
+  padding: 15px;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .s01 {
+    min-height: 280px;
+    padding: 20px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .s01 {
+    min-height: 220px;
+    padding: 15px;
+  }
+}
+.s01 form {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.s01 form legend {
+  font-size: clamp(2.2em, 8vw, 3.5em);
+  line-height: 1;
+  color: #fff;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: 'Tungsten-Bold', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 768px) {
+  .s01 form legend {
+    font-size: clamp(1.8em, 6vw, 2.5em);
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .s01 form legend {
+    font-size: clamp(1.4em, 5vw, 1.8em);
+    margin-top: 15px;
+    margin-bottom: 10px;
+  }
+}
+.hero-label {
+  color: #2F4F4A;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-family: 'Tungsten-Bold', sans-serif;
+}
+.hero-highlight {
+  color: #B7E35A;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-family: 'Tungsten-Bold', sans-serif;
+}
+.s01 form > p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1em;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* ---------- SEARCH SECTION ---------- */
+
+.search-form-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 35px 40px;
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 25px;
+  flex-wrap: wrap;
+  border-radius: 15px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .search-form-wrapper {
+    padding: 25px 20px;
+    gap: 15px;
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-form-wrapper {
+    padding: 20px 15px;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+}
+
+.search-form-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 220px;
+}
+
+@media (max-width: 768px) {
+  .search-form-group {
+    min-width: 100%;
+  }
+}
+
+.search-label {
+  font-size: clamp(0.75em, 2vw, 0.9em);
+  font-weight: bold;
+  color: #2F4F4A;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-icon {
+  position: absolute;
+  left: 15px;
+  color: #B7E35A;
+  font-size: 1.3em;
+  pointer-events: none;
+}
+.search-form-input {
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px 15px 12px 45px;
+  width: 100%;
+  font-size: 0.95em;
+  color: #2F4F4A;
+  transition: all 0.3s ease;
+  font-family: 'LatoWeb', sans-serif;
+}
+.search-form-input:focus {
+  outline: none;
+  border-color: #B7E35A;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(183, 227, 90, 0.1);
+}
+.search-form-input::placeholder {
+  color: #999;
+}
+.search-submit-btn {
+  background: linear-gradient(135deg, #B7E35A 0%, #a8d852 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  box-shadow: 0 4px 15px rgba(183, 227, 90, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+}
+.search-submit-btn:hover {
+  background: linear-gradient(135deg, #2F4F4A 0%, #1f3935 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(47, 79, 74, 0.4);
+}
+.search-submit-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 850px) {
+  .search-form-wrapper {
+    flex-direction: column;
+    padding: 25px;
+    gap: 15px;
+  }
+  .search-form-group {
+    width: 100%;
+  }
+  .search-submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .s01 form legend {
+    font-size: 40px;
+    margin-bottom: 15px;
+  }
+  .s01 form > p {
+    font-size: 1em !important;
+    margin-bottom: 20px !important;
+  }
+}
+
+/* ---------- EQUIPMENT CATEGORIES GRID ---------- */
+.ourentalequipmentmargin {
+  margin-top: 40px;
+}
+.containereqipmenttab {
+  max-width: 1500px;
+  padding: 0 20px;
+  margin: 0 auto;
+}
+.product-tab {
+  margin-bottom: 40px;
+}
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.equipment-col {
+  width: 100%;
+}
+.product {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.product-thumb-info-image {
+  overflow: hidden;
+  border-radius: 10px 10px 0 0;
+  background: #fff;
+}
+.product-thumb-info-image img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  display: block;
+}
+.product-thumb-info-image:hover img {
+  transform: scale(1.05);
+}
+.product-thumb-no-image {
+  width: 100%;
+  height: 220px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ddd;
+  font-size: 36px;
+}
+.product-thumb-info-content-homepage {
+  background: #B7E35A !important;
+  padding: 14px 10px;
+  text-align: center;
+  width: 100%;
+  text-transform: uppercase;
+  font: 0.9em 'LatoWebBold', sans-serif;
+  color: #fff;
+  border-radius: 0 0 10px 10px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+  margin: 0;
+}
+.product-thumb-info-content-homepage:hover {
+  background: #2F4F4A !important;
+}
+@media (max-width: 1100px) {
+  .category-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .product-thumb-info-image img,
+  .product-thumb-no-image {
+    height: 180px;
+  }
+}
+@media (max-width: 480px) {
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .containereqipmenttab {
+    padding: 0 12px;
+  }
+  .product-thumb-info-image img,
+  .product-thumb-no-image {
+    height: 140px;
+  }
+  .product-thumb-info-content-homepage {
+    font-size: 0.78em;
+    padding: 10px 6px;
+    min-height: 48px;
+  }
+}
+
+/* ---------- ABOUT SECTION (Benefits Grid) ---------- */
+.about-section {
+  padding: 80px 20px;
+  background: #fff;
+}
+.about-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+.about-header h2 {
+  font-family: 'Tungsten-Bold', sans-serif;
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+  color: #2F4F4A;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  position: relative;
+  padding-bottom: 20px;
+}
+.about-header h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: #B7E35A;
+  border-radius: 2px;
+}
+.about-header p {
+  color: #666;
+  font-size: 1.05em;
+  margin: 0;
+}
+.about-intro {
+  color: #666;
+  font-size: 1.05em;
+  text-align: center;
+  margin: 0 auto 40px;
+  max-width: 800px;
+  line-height: 1.8;
+}
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.benefit-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 36px 28px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+.benefit-card:hover {
+  transform: translateY(-8px);
+  border-color: #B7E35A;
+  box-shadow: 0 12px 35px rgba(183, 227, 90, 0.15);
+}
+.benefit-icon {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #B7E35A 0%, #a8d852 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 2.2em;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+.benefit-card:hover .benefit-icon {
+  background: linear-gradient(135deg, #2F4F4A 0%, #1f3935 100%);
+  transform: scale(1.1);
+}
+.benefit-card h3 {
+  font-family: 'LatoWebBold', sans-serif;
+  font-size: 1.1em;
+  color: #2F4F4A;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 15px 0 10px;
+}
+.benefit-card p {
+  color: #666;
+  font-size: 0.95em;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Two-Column Why Choose Layout */
+.why-choose-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: flex-start;
+}
+
+.why-choose-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.why-choose-left h2 {
+  font-family: 'Tungsten-Bold', sans-serif;
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+  color: #2F4F4A;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  line-height: 1.1;
+}
+
+.heading-underline {
+  width: 80px;
+  height: 4px;
+  background: #B7E35A;
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+
+.why-choose-intro {
+  color: #666;
+  font-size: 1.05em;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.why-choose-right {
+  display: flex;
+  align-items: flex-start;
+}
+
+.benefits-grid-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+/* About CTA and View All Button */
+.about-cta {
+  margin-top: 20px;
+}
+.view-all-btn {
+  display: inline-block;
+  background: #B7E35A;
+  color: #fff !important;
+  padding: 14px 36px;
+  border-radius: 6px;
+  font-family: 'LatoWebBold', sans-serif;
+  font-size: 0.95em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+.view-all-btn:hover {
+  background: #2F4F4A;
+  transform: translateY(-2px);
+  color: #fff !important;
+}
+
+.about-header {
+  display: none;
+}
+
+.about-intro {
+  display: none;
+}
+
+.benefits-grid {
+  display: none;
+}
+
+.header-underline {
+  width: 80px;
+  height: 4px;
+  background: #B7E35A;
+  border-radius: 2px;
+  margin: 15px auto 0;
+}
+
+/* ---------- CTA SECTION (Redesigned) ---------- */
+.cta-section {
+  background: linear-gradient(135deg, #2F4F4A 0%, #1a3330 100%);
+  padding: 80px 20px;
+  text-align: center;
+}
+.cta-container {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.cta-heading {
+  font-family: 'Tungsten-Bold', sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  margin: 0;
+}
+.cta-subtext {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95em;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 450px;
+}
+.cta-phone-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #B7E35A 0%, #a8d852 100%);
+  color: #fff !important;
+  padding: 14px 32px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: 'LatoWebBold', sans-serif;
+  font-size: 1.05em;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 6px 20px rgba(183, 227, 90, 0.25);
+  cursor: pointer;
+}
+.cta-phone-button i {
+  font-size: 1.1em;
+}
+.cta-phone-button:hover {
+  background: linear-gradient(135deg, #a8d852 0%, #98c645 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(183, 227, 90, 0.35);
+}
+.cta-phone-button:active {
+  transform: translateY(-1px);
+}
+
+/* ---------- UTILITIES ---------- */
+.text-center { text-align: center; }
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1200px) {
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 850px) {
+  .ourentalequipmentmargin {
+    margin-top: 40px;
+  }
+  .benefits-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .benefits-grid-two-col {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .benefit-card {
+    padding: 28px 20px;
+  }
+  .cta-section {
+    padding: 70px 20px;
+  }
+  .cta-heading {
+    font-size: 1.8rem;
+  }
+  .cta-phone-button {
+    font-size: 1em;
+    padding: 12px 28px;
+  }
+  .why-choose-wrapper {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .why-choose-left h2 {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .ourentalequipmentmargin {
+    margin-top: 40px;
+  }
+  .benefit-card {
+    padding: 24px 16px;
+  }
+  .benefit-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8em;
+  }
+  .benefit-card h3 {
+    font-size: 0.95em;
+  }
+  .benefit-card p {
+    font-size: 0.9em;
+  }
+  .about-header h2 {
+    font-size: 2rem;
+  }
+  .benefits-grid-two-col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .why-choose-left h2 {
+    font-size: 1.8rem;
+  }
+  .cta-heading {
+    font-size: 2rem;
+  }
+  .cta-subtext {
+    font-size: 1em;
+  }
+  .cta-phone-button {
+    font-size: 1.1em;
+    padding: 16px 36px;
+  }
+}
+
+@media (max-width: 580px) {
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .benefits-grid-two-col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .benefit-card {
+    padding: 20px 16px;
+  }
+  .ourentalequipmentmargin {
+    margin-top: 40px;
+  }
+  .search-form-wrapper {
+    padding: 20px;
+    gap: 10px;
+  }
+  .search-form-input,
+  .search-submit-btn {
+    font-size: 0.9em;
+  }
+  .why-choose-wrapper {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .why-choose-left h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ── Postal Code Modal ─────────────────────────────────────── */
+.postal-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.postal-modal-card {
+  position: relative;
+  background: #fff;
+  border-radius: 20px;
+  padding: 48px 40px 40px;
+  max-width: 440px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(-24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.postal-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 26px;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.postal-modal-close:hover { color: #333; }
+
+.postal-modal-icon-wrap {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #8bc34a, #7cb342);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
+}
+.postal-modal-icon-wrap i {
+  font-size: 26px;
+  color: #fff;
+}
+
+.postal-modal-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0 0 8px;
+  letter-spacing: 0.3px;
+}
+
+.postal-modal-subtitle {
+  font-size: 14px;
+  color: #777;
+  margin: 0 0 28px;
+  line-height: 1.5;
+}
+
+.postal-input-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+.postal-input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8bc34a;
+  font-size: 16px;
+}
+.postal-modal-input {
+  width: 100%;
+  padding: 15px 16px 15px 44px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  background: #f9f9f9;
+  color: #333;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.postal-modal-input:focus {
+  border-color: #8bc34a;
+  box-shadow: 0 0 0 4px rgba(139, 195, 74, 0.15);
+  background: #fff;
+}
+.postal-modal-input::placeholder {
+  color: #bbb;
+  letter-spacing: 2px;
+  font-weight: 400;
+}
+
+.postal-modal-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #8bc34a, #7cb342);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(139, 195, 74, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.postal-modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(139, 195, 74, 0.45);
+}
+.postal-modal-btn:active { transform: translateY(0); }

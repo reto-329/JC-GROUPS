@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Login to your JC Rentals account to manage your equipment rentals and bookings.">
+  <title>Login - JC Rentals</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <!-- Login Hero -->
+  <section class="login-hero">
+    <div>
+      <h1>Account Login</h1>
+      <p>Access Your Rental Dashboard</p>
+    </div>
+  </section>
+
+  <!-- Login Container -->
+  <main class="login-container">
+    <div class="login-wrapper">
+      <!-- Login Form -->
+      <div class="login-card">
+        <h2>Sign In</h2>
+        
+        <% if (message) { %>
+          <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <%= message %>
+          </div>
+        <% } %>
+
+        <% if (success) { %>
+          <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <%= success %>
+          </div>
+        <% } %>
+
+        <form id="loginForm" method="POST" action="/login">
+          <input type="hidden" name="redirect" value="<%= redirect || '' %>">
+          <input type="hidden" name="cartData" id="cartDataInput" value="">
+          
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <div class="input-wrap">
+              <i class="fas fa-envelope"></i>
+              <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <i class="fas fa-lock"></i>
+              <input type="password" id="password" name="password" placeholder="Enter your password" required>
+              <button type="button" class="pwd-toggle" data-field="password" aria-label="Toggle password visibility">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="remember-forgot">
+            <label class="remember-me">
+              <input type="checkbox" name="remember">
+              Remember me
+            </label>
+            <a href="#" class="forgot-password">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="login-btn">Sign In</button>
+        </form>
+      </div>
+
+      <!-- Sign Up Prompt -->
+      <div class="signup-card">
+        <h3>New Customer?</h3>
+        <p>Create an account with JC Rentals to manage your rental bookings, track orders, and save your favorite equipment.</p>
+        <a href="/register" class="signup-btn">Create Account</a>
+        
+        <div class="benefits-list">
+          <h4>Account Benefits:</h4>
+          <ul>
+            <li><i class="fas fa-check"></i> Fast checkout</li>
+            <li><i class="fas fa-check"></i> Rental history</li>
+            <li><i class="fas fa-check"></i> Saved preferences</li>
+            <li><i class="fas fa-check"></i> Special offers</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Info -->
+    <div class="security-info">
+      <div class="security-item">
+        <i class="fas fa-lock"></i>
+        <h4>Secure Login</h4>
+        <p>Your data is encrypted and protected with industry-standard security.</p>
+      </div>
+      <div class="security-item">
+        <i class="fas fa-shield-alt"></i>
+        <h4>Protected Account</h4>
+        <p>Two-factor authentication available for enhanced security.</p>
+      </div>
+      <div class="security-item">
+        <i class="fas fa-user-shield"></i>
+        <h4>Privacy First</h4>
+        <p>We never share your personal information with third parties.</p>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    console.log('[LOGIN PAGE] Script loading...');
+    
+    // Wait for form to be ready
+    function setupLoginForm() {
+      const loginForm = document.getElementById('loginForm');
+      const cartDataInput = document.getElementById('cartDataInput');
+      
+      console.log('[LOGIN PAGE] setupLoginForm - form exists:', !!loginForm);
+      console.log('[LOGIN PAGE] setupLoginForm - cartDataInput exists:', !!cartDataInput);
+      
+      if (!loginForm) {
+        console.error('[LOGIN PAGE] loginForm NOT FOUND!');
+        return;
+      }
+
+      loginForm.addEventListener('submit', function(e) {
+        console.log('[LOGIN PAGE] Form submit event triggered');
+        const cart = localStorage.getItem('cart');
+        console.log('[LOGIN PAGE] localStorage.cart:', cart ? `${cart.length} chars` : 'NULL/EMPTY');
+        
+        if (cart) {
+          try {
+            const parsed = JSON.parse(cart);
+            console.log('[LOGIN PAGE] Successfully parsed. Items:', Array.isArray(parsed) ? parsed.length : 'not array');
+            console.log('[LOGIN PAGE] First item:', parsed[0] ? { name: parsed[0].equipmentName, id: parsed[0].equipmentId } : 'none');
+            
+            cartDataInput.value = cart;
+            console.log('[LOGIN PAGE] cartDataInput.value set successfully');
+            console.log('[LOGIN PAGE] Form will now submit with cartData');
+          } catch (err) {
+            console.error('[LOGIN PAGE] Parse error:', err.message);
+          }
+        } else {
+          console.log('[LOGIN PAGE] No cart in localStorage - submitting form without cartData');
+        }
+      });
+    }
+
+    // Setup after DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupLoginForm);
+    } else {
+      setupLoginForm();
+    }
+
+    // Password visibility toggle
+    document.querySelectorAll('.pwd-toggle').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const fieldId = btn.dataset.field;
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

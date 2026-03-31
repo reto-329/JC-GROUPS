@@ -1,0 +1,158 @@
+<!-- HEADER / NAVIGATION -->
+<header data-logged-in="<%= isLoggedIn %>">
+  <div class="navbar-main">
+    <div class="container-layout">
+      <div class="navbar-header">
+        <a href="/" class="logo">
+          <img src="/images/LOGO.jpeg" alt="JC RENTALS Logo" class="logosize">
+        </a>
+      </div>
+      
+      <!-- HAMBURGER BUTTON (mobile only) -->
+      <button class="responsive-menu" id="mobileMenuToggle" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+      </button>
+      
+      <div class="navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav" id="navMenu">
+          <li><a href="/">Home</a></li>
+          <li class="account-dropdown">
+            <button class="account-trigger" aria-label="My Account" id="accountTrigger">
+              <i class="fas fa-user"></i>
+              <span>My Account</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="account-dropdown-menu" id="accountDropdownMenu">
+              <a href="/profile" class="account-dropdown-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Profile</span>
+              </a>
+              <a href="/orders" class="account-dropdown-item">
+                <i class="fas fa-file-alt"></i>
+                <span>Orders</span>
+              </a>
+              <a href="/billing" class="account-dropdown-item">
+                <i class="fas fa-credit-card"></i>
+                <span>Billing</span>
+              </a>
+              <a href="#" class="account-dropdown-item">
+                <i class="fas fa-sync-alt"></i>
+                <span>Auto-Renewal</span>
+              </a>
+              <a href="#" class="account-dropdown-item">
+                <i class="fas fa-quote-left"></i>
+                <span>Quotes</span>
+              </a>
+              <a href="/security" class="account-dropdown-item">
+                <i class="fas fa-lock"></i>
+                <span>Security</span>
+              </a>
+              <a href="/admin/login" class="account-dropdown-item" style="color: #999; font-size: 12px;">
+                <i class="fas fa-cog"></i>
+                <span>Admin Portal</span>
+              </a>
+              <div class="account-dropdown-divider"></div>
+              <% if (isLoggedIn) { %>
+                <a href="/logout" class="account-dropdown-item logout-item">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>Logout</span>
+                </a>
+              <% } else { %>
+                <a href="/login" class="account-dropdown-item login-item">
+                  <i class="fas fa-sign-in-alt"></i>
+                  <span>Login</span>
+                </a>
+              <% } %>
+            </div>
+          </li>
+          <li><a href="/about">About Us</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+        
+        <div class="navbar-right-items">
+          <div class="contact-no">
+            <a href="tel:613-334-2571">
+              <i class="fas fa-phone"></i> 613 334 2571
+            </a>
+          </div>
+          <div class="menu-shop">
+            <a href="/cart">
+              <i class="fas fa-shopping-cart"></i>
+              <span class="shopping-bag" id="cartCount">0</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Update cart count from localStorage or database
+  function updateCartCount() {
+    const header = document.querySelector('header');
+    const isLoggedIn = header.dataset.loggedIn === 'true';
+    const cartCountEl = document.getElementById('cartCount');
+    
+    if (!cartCountEl) return;
+    
+    if (isLoggedIn) {
+      // For logged-in users, fetch count from server
+      fetch('/api/cart/count')
+        .then(res => res.json())
+        .then(data => {
+          if (data.count !== undefined) {
+            cartCountEl.textContent = data.count;
+          }
+        })
+        .catch(err => console.error('Error fetching cart count:', err));
+    } else {
+      // For guests, count items in localStorage
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cartCountEl.textContent = cart.length;
+    }
+  }
+  
+  // Hamburger menu toggle (separate from dropdown manager)
+  document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const navbarCollapse = document.getElementById('navbarCollapse');
+
+    // Hamburger toggle
+    if (mobileMenuToggle && navbarCollapse) {
+      mobileMenuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        navbarCollapse.classList.toggle('active');
+        mobileMenuToggle.classList.toggle('active');
+      });
+
+      // Close mobile menu when clicking nav links
+      document.querySelectorAll('.navbar-nav > li > a').forEach(function(link) {
+        link.addEventListener('click', function() {
+          navbarCollapse.classList.remove('active');
+          mobileMenuToggle.classList.remove('active');
+        });
+      });
+
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.navbar-main')) {
+          navbarCollapse.classList.remove('active');
+          mobileMenuToggle.classList.remove('active');
+        }
+      });
+    }
+    
+    // Update cart count on page load
+    updateCartCount();
+  });
+  
+  // Listen for cart updates from other windows/tabs
+  window.addEventListener('cartUpdated', updateCartCount);
+  
+  // Check every 2 seconds to stay in sync with localStorage
+  setInterval(updateCartCount, 2000);
+</script>
+
+<!-- Dropdown menu manager -->
+<script src="/js/dropdown.js"></script>

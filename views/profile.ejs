@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage your JC Rentals account profile, personal information, and preferences.">
+  <title>My Profile - JC Rentals</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <!-- Profile Hero -->
+  <section class="profile-hero">
+    <div>
+      <h1>My Profile</h1>
+      <p>Manage Your Account Details</p>
+    </div>
+  </section>
+
+  <!-- Profile Container -->
+  <main class="profile-container">
+    <% if (successMessage) { %>
+      <div class="alert alert-success" style="margin-bottom: 2rem; animation: slideDown 0.3s ease;">
+        <i class="fas fa-check-circle"></i>
+        <%= successMessage %>
+      </div>
+    <% } %>
+
+    <div class="profile-grid">
+      <!-- Sidebar Navigation -->
+      <aside class="profile-sidebar">
+        <div class="profile-avatar">
+          <div class="avatar-placeholder">
+            <i class="fas fa-user"></i>
+          </div>
+        </div>
+        <h3>Welcome Back!</h3>
+        <p class="user-email"><%= user.email %></p>
+
+        <nav class="profile-nav">
+          <a href="#profile-info" class="nav-item active">
+            <i class="fas fa-user-circle"></i> Profile Information
+          </a>
+          <a href="/orders" class="nav-item">
+            <i class="fas fa-clipboard-list"></i> My Orders
+          </a>
+          <a href="/billing" class="nav-item">
+            <i class="fas fa-credit-card"></i> Billing Info
+          </a>
+          <a href="/security" class="nav-item">
+            <i class="fas fa-lock"></i> Security
+          </a>
+          <a href="#" class="nav-item">
+            <i class="fas fa-cog"></i> Settings
+          </a>
+          <a href="#" class="nav-item">
+            <i class="fas fa-question-circle"></i> Help
+          </a>
+        </nav>
+
+        <a href="/logout" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="profile-content">
+        <!-- Profile Information Section -->
+        <section class="profile-section" id="profile-info">
+          <div class="section-header">
+            <h2>Profile Information</h2>
+            <button class="edit-btn" onclick="toggleEditMode()" type="button">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+          </div>
+
+          <!-- View Mode -->
+          <div class="info-grid" id="viewMode">
+            <div class="info-card">
+              <label>Full Name</label>
+              <p><%= user.firstName %> <%= user.lastName %></p>
+            </div>
+            <div class="info-card">
+              <label>Email Address</label>
+              <p><%= user.email %></p>
+            </div>
+            <div class="info-card">
+              <label>Phone Number</label>
+              <p><%= user.phone || 'Not provided' %></p>
+            </div>
+            <div class="info-card">
+              <label>Member Since</label>
+              <p><%= new Date(user.createdAt).toLocaleDateString() %></p>
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <form id="editForm" class="edit-form" style="display: none;">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" id="firstName" name="firstName" value="<%= user.firstName %>" required>
+              </div>
+              <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" id="lastName" name="lastName" value="<%= user.lastName %>" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>">
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-save">Save Changes</button>
+              <button type="button" class="btn-cancel" onclick="toggleEditMode()">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Address Section -->
+        <section class="profile-section">
+          <div class="section-header">
+            <h2>Shipping Address</h2>
+            <button class="edit-btn" onclick="toggleAddressEdit()" type="button">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+          </div>
+
+          <!-- View Mode -->
+          <div class="address-card" id="addressView" <% if (!user.address && !user.city && !user.state && !user.zipCode) { %>style="display: none;"<% } %>>
+            <p><strong><%= user.address || 'Address not provided' %></strong></p>
+            <p><%= user.city || 'City' %>, <%= user.state || 'State' %> <%= user.zipCode || 'ZIP Code' %></p>
+            <p>Canada</p>
+          </div>
+
+          <!-- No Address Message -->
+          <div class="address-empty" id="addressEmpty" <% if (user.address && user.city && user.state && user.zipCode) { %>style="display: none;"<% } %>>
+            <p>No address on file</p>
+          </div>
+
+          <!-- Edit Mode -->
+          <form id="addressForm" class="edit-form" style="display: none;">
+            <div class="form-group">
+              <label for="address">Street Address</label>
+              <input type="text" id="address" name="address" value="<%= user.address || '' %>">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" value="<%= user.city || '' %>">
+              </div>
+              <div class="form-group">
+                <label for="state">State/Province</label>
+                <input type="text" id="state" name="state" value="<%= user.state || '' %>">
+              </div>
+              <div class="form-group">
+                <label for="zipCode">ZIP/Postal Code</label>
+                <input type="text" id="zipCode" name="zipCode" value="<%= user.zipCode || '' %>">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-save">Save Address</button>
+              <button type="button" class="btn-cancel" onclick="toggleAddressEdit()">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Account Statistics -->
+        <section class="profile-section">
+          <h2>Account Statistics</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-shopping-cart"></i>
+              </div>
+              <div class="stat-info">
+                <p class="stat-label">Total Orders</p>
+                <p class="stat-value">12</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="stat-info">
+                <p class="stat-label">Total Spent</p>
+                <p class="stat-value">$3,450</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-box"></i>
+              </div>
+              <div class="stat-info">
+                <p class="stat-label">Active Rentals</p>
+                <p class="stat-value">2</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-trophy"></i>
+              </div>
+              <div class="stat-info">
+                <p class="stat-label">Member Since</p>
+                <p class="stat-value">2024</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script>
+    // Toggle Profile Edit Mode
+    function toggleEditMode() {
+      const viewMode = document.getElementById('viewMode');
+      const editForm = document.getElementById('editForm');
+      
+      if (viewMode.style.display === 'none') {
+        viewMode.style.display = 'grid';
+        editForm.style.display = 'none';
+      } else {
+        viewMode.style.display = 'none';
+        editForm.style.display = 'block';
+      }
+    }
+
+    // Toggle Address Edit Mode
+    function toggleAddressEdit() {
+      const addressView = document.getElementById('addressView');
+      const addressEmpty = document.getElementById('addressEmpty');
+      const addressForm = document.getElementById('addressForm');
+      
+      if (addressForm.style.display === 'none') {
+        if (addressView) addressView.style.display = 'none';
+        if (addressEmpty) addressEmpty.style.display = 'none';
+        addressForm.style.display = 'block';
+      } else {
+        addressForm.style.display = 'none';
+        const hasAddress = document.getElementById('address').value && 
+                          document.getElementById('city').value &&
+                          document.getElementById('state').value &&
+                          document.getElementById('zipCode').value;
+        
+        if (hasAddress) {
+          if (addressView) addressView.style.display = 'block';
+          if (addressEmpty) addressEmpty.style.display = 'none';
+        } else {
+          if (addressView) addressView.style.display = 'none';
+          if (addressEmpty) addressEmpty.style.display = 'block';
+        }
+      }
+    }
+
+    // Handle Profile Form Submission
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        phone: document.getElementById('phone').value
+      };
+
+      try {
+        const response = await fetch('/profile/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Profile updated successfully!');
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (err) {
+        alert('Error updating profile');
+        console.error(err);
+      }
+    });
+
+    // Handle Address Form Submission
+    document.getElementById('addressForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        zipCode: document.getElementById('zipCode').value
+      };
+
+      try {
+        const response = await fetch('/profile/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Address updated successfully!');
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (err) {
+        alert('Error updating address');
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>
