@@ -39,9 +39,10 @@
 
 .equipment-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, auto));
   gap: 2rem;
   margin-bottom: 3rem;
+  justify-content: start;
 }
 
 @media (max-width: 768px) {
@@ -133,9 +134,12 @@
   transition: all 0.3s ease;
   text-align: center;
   text-decoration: none;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  min-height: 40px;
 }
 
 .btn-view {

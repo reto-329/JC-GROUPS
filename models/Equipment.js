@@ -45,6 +45,10 @@ const equipmentSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  imagePublicId: {
+    type: String,
+    default: null
+  },
   specifications: {
     type: Map,
     of: String,

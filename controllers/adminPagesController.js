@@ -1,4 +1,4 @@
-const { Admin, User } = require('../db');
+const { Admin, User, UserModel, EquipmentModel, Order } = require('../db');
 
 /**
  * Admin Pages Controller
@@ -34,6 +34,26 @@ const AdminPagesController = {
           })
         : null;
 
+      // Fetch real stats from database
+      // Count total users
+      const totalUsers = await UserModel.countDocuments();
+      
+      // Count total equipment
+      const totalEquipment = await EquipmentModel.countDocuments();
+      
+      // Count active orders (currently ongoing rentals)
+      const activeOrders = await Order.countDocuments({ 
+        status: { $in: ['active', 'confirmed'] } 
+      });
+      
+      // Calculate total revenue from all completed orders
+      const revenueResult = await Order.aggregate([
+        { $match: { status: 'completed' } },
+        { $group: { _id: null, totalRevenue: { $sum: '$totalAmount' } } }
+      ]);
+      
+      const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
+
       res.render('admin/dashboard', {
         title: 'JC Rentals - Admin Dashboard',
         adminName: `${admin.firstName} ${admin.lastName}`,
@@ -42,10 +62,10 @@ const AdminPagesController = {
         success,
         lastLogin,
         stats: {
-          totalUsers: 0,
-          totalEquipment: 0,
-          activeOrders: 0,
-          totalRevenue: 0
+          totalUsers,
+          totalEquipment,
+          activeOrders,
+          totalRevenue: totalRevenue.toFixed(2)
         }
       });
     } catch (err) {
@@ -214,15 +234,44 @@ const AdminPagesController = {
     try {
       const { Equipment } = require('../db');
       
+      // Define allowed categories
+      const ALLOWED_CATEGORIES = ['Tools', 'Machinery', 'Vehicles', 'Safety', 'Other'];
+      const category = req.body.category ? req.body.category.trim() : null;
+      
+      console.log('Category value from form:', category);
+      console.log('Category type:', typeof category);
+      console.log('Category length:', category ? category.length : 'null');
+      
+      // Validate category
+      if (!category) {
+        console.error('ERROR: Category is empty or not provided');
+        console.error('Received body keys:', Object.keys(req.body));
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Category is required. Make sure to select a category from the dropdown.' 
+        });
+      }
+      
+      if (!ALLOWED_CATEGORIES.includes(category)) {
+        console.error(`ERROR: Invalid category "${category}". Allowed: ${ALLOWED_CATEGORIES.join(', ')}`);
+        return res.status(400).json({ 
+          success: false, 
+          message: `Invalid category. Allowed categories are: ${ALLOWED_CATEGORIES.join(', ')}` 
+        });
+      }
+      
+      console.log('✓ Category validated:', category);
+      
       const equipmentData = {
         name: req.body.name,
         description: req.body.description,
-        category: req.body.category,
+        category: category,
         dailyRate: parseFloat(req.body.dailyRate),
         weeklyRate: parseFloat(req.body.weeklyRate) || 0,
         monthlyRate: parseFloat(req.body.monthlyRate) || 0,
         quantity: parseInt(req.body.quantity),
-        image: req.file ? `/images/EQUIPMENTS/${req.file.filename}` : null,
+        image: req.file ? req.file.path : null,
+        imagePublicId: req.file ? req.file.filename : null,
         manufacturer: req.body.manufacturer || '',
         model: req.body.model || ''
       };
@@ -258,19 +307,18 @@ const AdminPagesController = {
     try {
       const equipmentId = req.params.id;
       const { Equipment } = require('../db');
-      const path = require('path');
-      const fs = require('fs');
+      const cloudinary = require('cloudinary').v2;
       
-      // Get equipment to retrieve image path
+      // Get equipment to retrieve image public_id
       const equipment = await Equipment.findById(equipmentId);
-      if (equipment && equipment.image) {
-        // Extract filename from image path
-        const imagePath = path.join(__dirname, '../public', equipment.image);
-        
-        // Delete image file if it exists
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-          console.log('Image deleted:', imagePath);
+      if (equipment && equipment.imagePublicId) {
+        try {
+          // Delete image from Cloudinary
+          await cloudinary.uploader.destroy(equipment.imagePublicId);
+          console.log('Image deleted from Cloudinary:', equipment.imagePublicId);
+        } catch (err) {
+          console.error('Error deleting image from Cloudinary:', err);
+          // Continue with equipment deletion even if image deletion fails
         }
       }
       
@@ -307,40 +355,59 @@ const AdminPagesController = {
 
     try {
       const { Equipment } = require('../db');
-      const path = require('path');
-      const fs = require('fs');
+      const cloudinary = require('cloudinary').v2;
       
       const equipmentId = req.params.id;
       
-      // Get current equipment to retrieve old image path
+      // Get current equipment to retrieve old image public_id
       const equipment = await Equipment.findById(equipmentId);
       if (!equipment) {
         return res.status(404).json({ success: false, message: 'Equipment not found' });
       }
       
-      let imagePath = equipment.image;
+      // Validate category (only required if provided)
+      const ALLOWED_CATEGORIES = ['Tools', 'Machinery', 'Vehicles', 'Safety', 'Other'];
+      const category = req.body.category ? req.body.category.trim() : null;
       
-      // Delete old image if new image is provided
+      // Use provided category or keep existing one
+      const finalCategory = category || equipment.category;
+      
+      if (!finalCategory || !ALLOWED_CATEGORIES.includes(finalCategory)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Invalid category. Allowed categories are: ${ALLOWED_CATEGORIES.join(', ')}` 
+        });
+      }
+      
+      let imagePath = equipment.image;
+      let imagePublicId = equipment.imagePublicId;
+      
+      // Delete old image from Cloudinary if new image is provided
       if (req.file) {
-        if (equipment.image) {
-          const oldImagePath = path.join(__dirname, '../public', equipment.image);
-          if (fs.existsSync(oldImagePath)) {
-            fs.unlinkSync(oldImagePath);
-            console.log('Old image deleted:', oldImagePath);
+        if (equipment.imagePublicId) {
+          try {
+            await cloudinary.uploader.destroy(equipment.imagePublicId);
+            console.log('Old image deleted from Cloudinary:', equipment.imagePublicId);
+          } catch (err) {
+            console.error('Error deleting old image from Cloudinary:', err);
+            // Continue with update even if old image deletion fails
           }
         }
-        imagePath = `/images/EQUIPMENTS/${req.file.filename}`;
+        // Use Cloudinary URL and public ID
+        imagePath = req.file.path;
+        imagePublicId = req.file.filename;
       }
       
       const equipmentData = {
         name: req.body.name,
         description: req.body.description,
-        category: req.body.category,
+        category: finalCategory,
         dailyRate: parseFloat(req.body.dailyRate),
         weeklyRate: parseFloat(req.body.weeklyRate) || 0,
         monthlyRate: parseFloat(req.body.monthlyRate) || 0,
         quantity: parseInt(req.body.quantity),
         image: imagePath,
+        imagePublicId: imagePublicId,
         manufacturer: req.body.manufacturer || '',
         model: req.body.model || ''
       };

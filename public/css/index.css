@@ -289,8 +289,10 @@ img { max-width: 100%; height: auto; display: block; }
   box-shadow: 0 4px 15px rgba(183, 227, 90, 0.3);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   height: 46px;
+  min-height: 46px;
 }
 .search-submit-btn:hover {
   background: linear-gradient(135deg, #2F4F4A 0%, #1f3935 100%);
@@ -383,12 +385,13 @@ img { max-width: 100%; height: auto; display: block; }
   font: 0.9em 'LatoWebBold', sans-serif;
   color: #fff;
   border-radius: 0 0 10px 10px;
-  min-height: 56px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.3s;
   margin: 0;
+  overflow: hidden;
 }
 .product-thumb-info-content-homepage:hover {
   background: #2F4F4A !important;
@@ -578,7 +581,9 @@ img { max-width: 100%; height: auto; display: block; }
   margin-top: 20px;
 }
 .view-all-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: #B7E35A;
   color: #fff !important;
   padding: 14px 36px;
@@ -589,6 +594,7 @@ img { max-width: 100%; height: auto; display: block; }
   letter-spacing: 1px;
   transition: all 0.3s ease;
   text-decoration: none;
+  min-height: 48px;
 }
 .view-all-btn:hover {
   background: #2F4F4A;
@@ -663,6 +669,7 @@ img { max-width: 100%; height: auto; display: block; }
   border: none;
   box-shadow: 0 6px 20px rgba(183, 227, 90, 0.25);
   cursor: pointer;
+  min-height: 48px;
 }
 .cta-phone-button i {
   font-size: 1.1em;
@@ -804,6 +811,7 @@ img { max-width: 100%; height: auto; display: block; }
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   z-index: 1000;
   align-items: center;
@@ -926,6 +934,7 @@ img { max-width: 100%; height: auto; display: block; }
   gap: 10px;
   box-shadow: 0 6px 20px rgba(139, 195, 74, 0.35);
   transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 48px;
 }
 .postal-modal-btn:hover {
   transform: translateY(-2px);
