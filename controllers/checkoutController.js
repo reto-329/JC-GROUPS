@@ -1,4 +1,4 @@
-const { User, Order, Cart, Equipment } = require('../db');
+const { User, Order, Cart, Equipment, ServiceArea } = require('../db');
 const axios = require('axios');
 const crypto = require('crypto');
 
@@ -29,10 +29,13 @@ const CheckoutController = {
       // Get user details
       const user = await User.findById(userId);
 
+      // Get allowed service areas
+      const serviceAreas = await ServiceArea.find({ isActive: true });
+
       // Calculate totals
       const subtotal = cart.items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
       const tax = subtotal * 0.13; // 13% HST
-      const deliveryFee = 15.00; // Fixed delivery fee
+      const deliveryFee = 0; // Start at 0, updated when user selects area
       const total = subtotal + tax + deliveryFee;
 
       // Generate Moneris transaction data
@@ -49,6 +52,7 @@ const CheckoutController = {
         total: total.toFixed(2),
         orderId: orderId,
         sessionId: sessionId,
+        serviceAreas: serviceAreas,
         // Moneris test credentials - CHANGE TO PRODUCTION
         monerisStoreId: process.env.MONERIS_STORE_ID || 'store1',
         monerisApiToken: process.env.MONERIS_API_TOKEN || 'yesguy',
@@ -79,14 +83,21 @@ const CheckoutController = {
         });
       }
 
-      // Validate postal code - only K0L 1W0 service area
-      const ALLOWED_POSTAL_CODE = 'K0L1W0';
+      // Validate postal code against service areas
       const normalizedPostalCode = deliveryAddress.zipCode.replace(/\s/g, '').toUpperCase();
+      const serviceArea = await ServiceArea.findOne({ 
+        postalCode: normalizedPostalCode,
+        isActive: true 
+      });
       
-      if (normalizedPostalCode !== ALLOWED_POSTAL_CODE) {
+      if (!serviceArea) {
+        // Get all available postal codes for error message
+        const availableAreas = await ServiceArea.find({ isActive: true });
+        const postalCodes = availableAreas.map(a => `${a.postalCode} (${a.city})`).join(', ');
+        
         return res.status(400).json({
           success: false,
-          message: `We currently only deliver to postal code K0L 1W0. Your postal code (${deliveryAddress.zipCode}) is outside our service area.`
+          message: `Postal code ${deliveryAddress.zipCode} is not in our delivery area. Available areas: ${postalCodes}`
         });
       }
 
@@ -100,10 +111,10 @@ const CheckoutController = {
         });
       }
 
-      // Calculate total
+      // Calculate total with service area delivery fee
       const subtotal = cart.items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
       const tax = subtotal * 0.13;
-      const deliveryFee = 15.00;
+      const deliveryFee = serviceArea.deliveryFee; // Use fee from service area
       const total = subtotal + tax + deliveryFee;
 
       // Get user
@@ -160,6 +171,16 @@ const CheckoutController = {
       });
 
       const savedOrder = await order.save();
+
+      // Update equipment stock for each item in the order
+      for (const item of cart.items) {
+        await Equipment.findByIdAndUpdate(
+          item.equipmentId,
+          { $inc: { stock: -item.quantity } },
+          { new: true }
+        );
+        console.log(`[ORDER] Updated stock for equipment ${item.equipmentName}: -${item.quantity}`);
+      }
 
       // Clear the cart after successful order
       await Cart.deleteOne({ userId });

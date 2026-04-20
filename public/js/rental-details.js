@@ -80,12 +80,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const equipmentName = container.dataset.equipmentName;
   const equipmentImage = container.dataset.equipmentImage;
 
-  const VALID_POSTAL_CODES = ['K0L1W0', 'K0L 1W0'];
+  // Get dynamic service areas from data attribute
+  const serviceAreasData = JSON.parse(container.dataset.serviceAreas || '[]');
+  const allowedPostalCodes = serviceAreasData
+    .map(area => area.postalCode.replace(/\s/g, '').toUpperCase());
 
   const rentalDaysInput = document.getElementById('rentalDays');
   const rentalQtyInput = document.getElementById('rentalQty');
   const startDateInput = document.getElementById('startDate');
-  const postalCodeInput = document.getElementById('postalCode');
+  const postalCodeSelect = document.getElementById('postalCode');
   const postalCodeError = document.getElementById('postalCodeError');
   const decreaseBtn = document.getElementById('decreaseQty');
   const increaseBtn = document.getElementById('increaseQty');
@@ -97,16 +100,14 @@ document.addEventListener('DOMContentLoaded', function () {
   startDateInput.value = today;
 
   function validatePostalCode() {
-    const val = postalCodeInput.value.trim().toUpperCase();
+    const val = postalCodeSelect.value.trim();
     if (!val) {
-      postalCodeError.textContent = 'Please enter a postal code';
-      return false;
-    }
-    if (!VALID_POSTAL_CODES.includes(val)) {
-      postalCodeError.textContent = 'We do not service this area. Valid: K0L1W0';
+      postalCodeError.textContent = 'Please select a delivery area';
+      postalCodeError.style.display = 'block';
       return false;
     }
     postalCodeError.textContent = '';
+    postalCodeError.style.display = 'none';
     return true;
   }
 
@@ -120,10 +121,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('totalPrice').textContent = cost;
   }
 
-  postalCodeInput.addEventListener('blur', validatePostalCode);
-  postalCodeInput.addEventListener('input', function () {
-    if (postalCodeError.textContent) validatePostalCode();
-  });
+  postalCodeSelect.addEventListener('change', validatePostalCode);
 
   decreaseBtn.addEventListener('click', function () {
     const val = parseInt(rentalQtyInput.value);
@@ -138,8 +136,14 @@ document.addEventListener('DOMContentLoaded', function () {
   rentalDaysInput.addEventListener('input', updatePricing);
   rentalQtyInput.addEventListener('input', updatePricing);
 
-  completeBtn.addEventListener('click', async function () {
-    if (!validatePostalCode()) return;
+  completeBtn.addEventListener('click', async function (e) {
+    e.preventDefault();
+    console.log('Complete Order button clicked');
+    
+    if (!validatePostalCode()) {
+      console.log('Postal code validation failed');
+      return;
+    }
     if (!document.getElementById('rentalForm').checkValidity()) {
       alert('Please fill in all required fields');
       return;
@@ -152,6 +156,8 @@ document.addEventListener('DOMContentLoaded', function () {
     endDate.setDate(endDate.getDate() + days);
     const totalAmount = days * quantity * dailyRate;
 
+    console.log('Order data being prepared:', { days, quantity, startDate, totalAmount });
+
     const orderData = {
       equipmentId,
       equipmentName,
@@ -162,9 +168,11 @@ document.addEventListener('DOMContentLoaded', function () {
       days,
       subtotal: totalAmount,
       totalAmount,
-      postalCode: postalCodeInput.value.trim().toUpperCase(),
+      postalCode: postalCodeSelect.value.trim().toUpperCase(),
       equipmentImage
     };
+
+    console.log('Final order data:', orderData);
 
     try {
       completeBtn.disabled = true;
@@ -172,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Save to localStorage if user is not logged in
       if (!userId) {
+        console.log('User not logged in, saving to cart (localStorage)');
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         cart.push(orderData);
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -183,13 +192,16 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => window.location.href = '/cart', 2000);
       } else {
         // If logged in, add to server
+        console.log('User logged in, sending to server');
         const response = await fetch('/api/orders/add-to-cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
 
+        console.log('Response status:', response.status);
         const result = await response.json();
+        console.log('Response result:', result);
 
         if (result.success) {
           // Trigger cart update event for header
@@ -198,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
           showSuccessModal('Success!', 'Item added to cart successfully. Redirecting to your cart...');
           setTimeout(() => window.location.href = '/cart', 2000);
         } else {
+          console.error('Server error:', result.message);
           showErrorModal('Error', result.message || 'Error adding to cart');
           completeBtn.disabled = false;
           completeBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> COMPLETE ORDER';
@@ -205,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (err) {
       console.error('Error:', err);
+      console.error('Error message:', err.message);
       showErrorModal('Error', 'Failed to complete order. Please try again.');
       completeBtn.disabled = false;
       completeBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> COMPLETE ORDER';

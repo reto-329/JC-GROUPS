@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="JC Rentals Admin - Service Areas Management">
+  <title>Service Areas Management - JC Rentals Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-service-areas-page">
+  <div class="admin-wrapper">
+    <!-- Sidebar -->
+    <% locals.currentPage = 'service-areas'; %>
+    <%- include('partials/sidebar') %>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Top Bar -->
+      <% locals.pageTitle = 'Service Areas'; %>
+      <%- include('partials/topbar') %>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="content-header">
+          <h2>Service Areas Management</h2>
+          <p class="text-muted">Manage delivery postal codes and service fees</p>
+        </div>
+
+        <!-- Toolbar with Add Button -->
+        <div class="management-toolbar">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="areaSearch" placeholder="Search by postal code or city...">
+          </div>
+          <button class="btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> Add Service Area
+          </button>
+        </div>
+
+        <!-- Alert Messages -->
+        <div id="alert" class="alert" role="alert"></div>
+
+        <!-- Service Areas Table -->
+        <div class="table-container">
+          <table class="management-table">
+            <thead>
+              <tr>
+                <th>Postal Code</th>
+                <th>City</th>
+                <th>Province</th>
+                <th>Delivery Fee</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="service-areas-body">
+              <% if (serviceAreas && serviceAreas.length > 0) { %>
+                <% serviceAreas.forEach(area => { %>
+                  <tr data-id="<%= area._id %>">
+                    <td><strong><%= area.postalCode %></strong></td>
+                    <td><%= area.city %></td>
+                    <td><%= area.province %></td>
+                    <td>$<%= area.deliveryFee.toFixed(2) %></td>
+                    <td>
+                      <span class="status-badge <%= area.isActive ? 'active' : 'inactive' %>">
+                        <i class="fas fa-<%= area.isActive ? 'check-circle' : 'times-circle' %>"></i>
+                        <%= area.isActive ? 'Active' : 'Inactive' %>
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="action-btn edit-btn" onclick="editServiceArea('<%= area._id %>')" title="Edit">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="action-btn delete-btn" onclick="deleteServiceArea('<%= area._id %>')" title="Delete">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr class="no-data">
+                  <td colspan="6">
+                    <i class="fas fa-inbox"></i>
+                    <p>No service areas added yet</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div id="serviceAreaModal" class="admin-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add Service Area</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="serviceAreaForm" onsubmit="handleFormSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="postalCode">Postal Code *</label>
+              <input type="text" id="postalCode" placeholder="e.g., K0L 1W0" required>
+            </div>
+            <div class="form-group">
+              <label for="deliveryFee">Delivery Fee ($) *</label>
+              <input type="number" id="deliveryFee" step="0.01" min="0" value="15.00" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input type="text" id="city" placeholder="e.g., Plevna" required>
+            </div>
+            <div class="form-group">
+              <label for="province">Province *</label>
+              <input type="text" id="province" placeholder="e.g., ON" maxlength="2" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="isActive" style="display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="isActive" checked style="margin: 0;"> 
+              <span>Active</span>
+            </label>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="submit" class="btn-primary">Save Service Area</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteConfirmModal" class="admin-modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Delete Service Area</h2>
+        <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+          <div style="
+            width: 50px;
+            height: 50px;
+            background: #f8d7da;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          ">
+            <i class="fas fa-exclamation-triangle" style="color: #dc3545; font-size: 24px;"></i>
+          </div>
+          <div>
+            <p style="margin: 0; font-weight: 600; color: #333;">Are you sure?</p>
+            <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">
+              This action cannot be undone. The service area will be permanently deleted.
+            </p>
+          </div>
+        </div>
+
+        <div style="
+          background: #fff3cd;
+          border: 1px solid #ffeeba;
+          color: #856404;
+          padding: 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          margin-bottom: 20px;
+        ">
+          <i class="fas fa-info-circle"></i>
+          <strong>Postal Code:</strong> <span id="deletePostalCode"></span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+          <button type="button" class="btn-danger" onclick="confirmDelete()">Delete Service Area</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/sidebar-script') %>
+
+  <!-- Data container for service areas -->
+  <div id="data-container" data-service-areas='<%- JSON.stringify(serviceAreas || []) %>' style="display: none;"></div>
+
+  <script>
+    let editingId = null;
+    let deleteId = null;
+    // Parse service areas from data attribute
+    const serviceAreas = JSON.parse(document.getElementById('data-container').getAttribute('data-service-areas') || '[]');
+
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = 'Add Service Area';
+      document.getElementById('serviceAreaForm').reset();
+      document.getElementById('isActive').checked = true;
+      document.getElementById('serviceAreaModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('serviceAreaModal').classList.remove('active');
+      document.getElementById('serviceAreaForm').reset();
+      editingId = null;
+    }
+
+    function editServiceArea(id) {
+      const area = serviceAreas.find(a => a._id === id);
+      if (!area) return;
+
+      editingId = id;
+      document.getElementById('modalTitle').textContent = 'Edit Service Area';
+      document.getElementById('postalCode').value = area.postalCode;
+      document.getElementById('city').value = area.city;
+      document.getElementById('province').value = area.province;
+      document.getElementById('deliveryFee').value = area.deliveryFee;
+      document.getElementById('isActive').checked = area.isActive;
+      document.getElementById('serviceAreaModal').classList.add('active');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteConfirmModal').classList.remove('active');
+      deleteId = null;
+    }
+
+    function deleteServiceArea(id) {
+      const area = serviceAreas.find(a => a._id === id);
+      if (!area) return;
+
+      deleteId = id;
+      document.getElementById('deletePostalCode').textContent = area.postalCode + ' (' + area.city + ')';
+      document.getElementById('deleteConfirmModal').classList.add('active');
+    }
+
+    async function confirmDelete() {
+      if (!deleteId) return;
+
+      try {
+        const response = await fetch(`/admin/api/service-areas/${deleteId}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          showAlert(result.message, 'success');
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          showAlert(result.message || 'Error deleting service area', 'error');
+          closeDeleteModal();
+        }
+      } catch (err) {
+        showAlert('Error: ' + err.message, 'error');
+        closeDeleteModal();
+      }
+    }
+
+    async function handleFormSubmit(event) {
+      event.preventDefault();
+
+      // Validate form inputs
+      const postalCode = document.getElementById('postalCode').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const province = document.getElementById('province').value.trim();
+      const deliveryFee = document.getElementById('deliveryFee').value.trim();
+
+      if (!postalCode || !city || !province || !deliveryFee) {
+        showAlert('All fields are required', 'error');
+        return;
+      }
+
+      const data = {
+        postalCode: postalCode,
+        city: city,
+        province: province,
+        deliveryFee: parseFloat(deliveryFee),
+        isActive: document.getElementById('isActive').checked
+      };
+
+      console.log('Submitting data:', data);
+      console.log('Editing ID:', editingId);
+
+      try {
+        const url = editingId 
+          ? `/admin/api/service-areas/${editingId}`
+          : '/admin/api/service-areas';
+        const method = editingId ? 'PUT' : 'POST';
+
+        console.log('Request URL:', url);
+        console.log('Request Method:', method);
+
+        const response = await fetch(url, {
+          method: method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+
+        const result = await response.json();
+
+        console.log('Response result:', result);
+
+        if (result.success) {
+          showAlert(result.message, 'success');
+          closeModal();
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          showAlert(result.message || 'Error saving service area', 'error');
+        }
+      } catch (err) {
+        console.error('Fetch error:', err);
+        showAlert('Error: ' + err.message, 'error');
+      }
+    }
+
+    function showAlert(message, type) {
+      const alert = document.getElementById('alert');
+      alert.textContent = message;
+      alert.className = `alert alert-${type} show`;
+      setTimeout(() => alert.classList.remove('show'), 5000);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('serviceAreaModal').addEventListener('click', function(event) {
+      if (event.target === this) closeModal();
+    });
+
+    document.getElementById('deleteConfirmModal').addEventListener('click', function(event) {
+      if (event.target === this) closeDeleteModal();
+    });
+
+    // Search functionality
+    document.getElementById('areaSearch').addEventListener('input', function(e) {
+      const searchTerm = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#service-areas-body tr');
+      
+      rows.forEach(row => {
+        const postalCode = row.querySelector('td:first-child').textContent.toLowerCase();
+        const city = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        
+        if (postalCode.includes(searchTerm) || city.includes(searchTerm)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

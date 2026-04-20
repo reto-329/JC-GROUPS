@@ -8,11 +8,13 @@ const Equipment = require('./Equipment');
 const Order = require('./Order');
 const Review = require('./Review');
 const Admin = require('./Admin');
+const ServiceArea = require('./ServiceArea');
 
 module.exports = {
   User,
   Equipment,
   Order,
   Review,
-  Admin
+  Admin,
+  ServiceArea
 };

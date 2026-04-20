@@ -164,12 +164,20 @@
 
   <%- include('partials/footer') %>
 
+  <!-- Data container for service areas -->
+  <div id="data-container" data-service-areas='<%- JSON.stringify(serviceAreas || []) %>' style="display: none;"></div>
+
   <script>
+    // Get dynamic service areas from server
+    const serviceAreas = JSON.parse(document.getElementById('data-container').getAttribute('data-service-areas') || '[]');
+    const allowedPostalCodes = serviceAreas
+      .filter(area => area.isActive)
+      .map(area => area.postalCode.replace(/\s/g, '').toUpperCase());
+
     const modal = document.getElementById('postalCodeModal');
     const postalCodeInput = document.getElementById('postalCodeInput');
     const submitBtn = document.getElementById('postalCodeSubmitBtn');
     const errorMessage = document.getElementById('postalErrorMessage');
-    const VALID_POSTAL_CODES = ['K0L1W0', 'K0L 1W0']; // Both formats accepted
 
     // Hide on load
     modal.style.display = 'none';
@@ -190,10 +198,7 @@
     }
 
     function submitPostalCode() {
-      const postalCode = postalCodeInput.value.trim().toUpperCase();
-      
-      // Check if postal code is valid
-      const isValid = VALID_POSTAL_CODES.some(code => code === postalCode);
+      const postalCode = postalCodeInput.value.trim().toUpperCase().replace(/\s/g, '');
       
       if (!postalCode) {
         errorMessage.textContent = 'Please enter a postal code';
@@ -201,8 +206,15 @@
         return;
       }
       
+      // Check if postal code is valid
+      const isValid = allowedPostalCodes.includes(postalCode);
+      
       if (!isValid) {
-        errorMessage.textContent = 'We currently do not service this area. Valid areas: K0L1W0';
+        const availableCodes = serviceAreas
+          .filter(area => area.isActive)
+          .map(area => `${area.postalCode} (${area.city})`)
+          .join(', ');
+        errorMessage.textContent = `We deliver to: ${availableCodes}`;
         errorMessage.style.display = 'block';
         return;
       }
@@ -236,7 +248,7 @@
 
     heroSearchBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      const location = locationInput.value.trim().toUpperCase();
+      const location = locationInput.value.trim().toUpperCase().replace(/\s/g, '');
       const equipment = equipmentInput.value.trim();
       
       // Validate postal code - must be provided and valid
@@ -246,9 +258,13 @@
         return;
       }
       
-      const isValid = VALID_POSTAL_CODES.some(code => code === location);
+      const isValid = allowedPostalCodes.includes(location);
       if (!isValid) {
-        heroSearchErrorMessage.textContent = 'We currently do not service this area. Valid areas: K0L1W0';
+        const availableCodes = serviceAreas
+          .filter(area => area.isActive)
+          .map(area => `${area.postalCode} (${area.city})`)
+          .join(', ');
+        heroSearchErrorMessage.textContent = `We deliver to: ${availableCodes}`;
         heroSearchErrorMessage.style.display = 'block';
         return;
       }

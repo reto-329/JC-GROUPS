@@ -23,6 +23,7 @@
     data-user-id="<%= userId || '' %>"
     data-equipment-name="<%= equipment.name %>"
     data-equipment-image="<%= equipment.image || '' %>"
+    data-service-areas='<%- JSON.stringify(serviceAreas || []) %>'
   >
     <!-- Equipment Details -->
     <div class="rd-details">
@@ -67,8 +68,19 @@
             <div class="rd-step-label">Delivery Location</div>
           </div>
           <div class="rd-form-group">
-            <label for="postalCode">Postal Code</label>
-            <input type="text" id="postalCode" name="postalCode" placeholder="e.g. K0L1W0" maxlength="7" autocomplete="off" required>
+            <label for="postalCode">Select Service Area</label>
+            <select id="postalCode" name="postalCode" required>
+              <option value="">-- Choose a delivery area --</option>
+              <% if (serviceAreas && serviceAreas.length > 0) { %>
+                <% serviceAreas.forEach(area => { %>
+                  <option value="<%= area.postalCode %>">
+                    <%= area.postalCode %> (<%= area.city %>, <%= area.province %>) - Delivery: $<%= area.deliveryFee.toFixed(2) %>
+                  </option>
+                <% }); %>
+              <% } else { %>
+                <option value="" disabled>No service areas available</option>
+              <% } %>
+            </select>
             <div id="postalCodeError" class="rd-field-error"></div>
           </div>
         </div>

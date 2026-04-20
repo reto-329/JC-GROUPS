@@ -10,19 +10,23 @@ const PagesController = {
    */
   getHome: async (req, res) => {
     try {
-      const { Equipment } = require('../db');
+      const { Equipment, ServiceArea } = require('../db');
       const equipment = await Equipment.findAll();
+      const serviceAreas = await ServiceArea.find({ isActive: true });
+      
       // Limit to first 16 items
       const limitedEquipment = equipment ? equipment.slice(0, 16) : [];
       res.render('index', { 
         title: 'JC Rentals - Home',
-        equipment: limitedEquipment
+        equipment: limitedEquipment,
+        serviceAreas: serviceAreas
       });
     } catch (err) {
       console.error('Home page error:', err);
       res.render('index', { 
         title: 'JC Rentals - Home',
-        equipment: []
+        equipment: [],
+        serviceAreas: []
       });
     }
   },
@@ -159,22 +163,33 @@ const PagesController = {
    */
   getRentalDetails: async (req, res) => {
     try {
-      const { Equipment } = require('../db');
+      const { Equipment, ServiceArea } = require('../db');
+      console.log('Getting rental details for equipment ID:', req.params.id);
+      
       const equipment = await Equipment.findById(req.params.id);
+      console.log('Equipment found:', equipment ? equipment.name : 'NOT FOUND');
       
       if (!equipment) {
         return res.status(404).json({ error: 'Equipment not found' });
       }
+
+      // Fetch active service areas
+      console.log('Fetching service areas...');
+      const serviceAreas = await ServiceArea.find({ isActive: true });
+      console.log('Service areas found:', serviceAreas.length);
       
       res.render('rental-details', {
         title: `Rent ${equipment.name} - JC Rentals`,
         equipment: equipment,
+        serviceAreas: serviceAreas,
         isLoggedIn: !!req.session.userId,
         userId: req.session.userId
       });
     } catch (err) {
       console.error('Rental details error:', err);
-      res.status(500).json({ error: 'Error loading rental details' });
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+      res.status(500).json({ error: 'Error loading rental details: ' + err.message });
     }
   },
 

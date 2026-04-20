@@ -55,10 +55,12 @@ const AdminPagesController = {
       const totalRevenue = revenueResult.length > 0 ? revenueResult[0].totalRevenue : 0;
 
       res.render('admin/dashboard', {
+        pageTitle: 'Dashboard',
         title: 'JC Rentals - Admin Dashboard',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
+        currentPage: 'dashboard',
         success,
         lastLogin,
         stats: {
@@ -103,10 +105,12 @@ const AdminPagesController = {
       }));
       
       res.render('admin/users', {
+        pageTitle: 'Users',
         title: 'JC Rentals - Manage Users',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
+        currentPage: 'users',
         users: usersWithRentals
       });
     } catch (err) {
@@ -131,10 +135,12 @@ const AdminPagesController = {
       const equipment = await Equipment.findAll();
       
       res.render('admin/equipment', {
+        pageTitle: 'Equipment',
         title: 'JC Rentals - Manage Equipment',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
+        currentPage: 'equipment',
         equipment: equipment
       });
     } catch (err) {
@@ -161,10 +167,12 @@ const AdminPagesController = {
         .lean();
 
       res.render('admin/orders', {
+        pageTitle: 'Orders',
         title: 'JC Rentals - Manage Orders',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
+        currentPage: 'orders',
         orders
       });
     } catch (err) {
@@ -187,6 +195,43 @@ const AdminPagesController = {
     } catch (err) {
       console.error('Delete order error:', err);
       res.status(500).json({ success: false, message: 'Error deleting order' });
+    }
+  },
+
+  /**
+   * Update Order Status
+   * Only admins can update order status to "returned" or other statuses
+   */
+  updateOrderStatus: async (req, res) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      // Validate status
+      const validStatuses = ['pending', 'confirmed', 'active', 'returned', 'completed', 'cancelled'];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ success: false, message: 'Invalid status' });
+      }
+
+      const Order = require('../models/Order');
+      const updatedOrder = await Order.findByIdAndUpdate(
+        id,
+        { status: status, updatedAt: new Date() },
+        { new: true }
+      );
+
+      if (!updatedOrder) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+
+      console.log(`[ADMIN] Order ${id} status updated to: ${status}`);
+      res.json({ success: true, message: 'Order status updated successfully', order: updatedOrder });
+    } catch (err) {
+      console.error('Update order status error:', err);
+      res.status(500).json({ success: false, message: 'Error updating order status' });
     }
   },
 
@@ -428,6 +473,258 @@ const AdminPagesController = {
       res.status(500).json({ 
         success: false, 
         message: 'Error updating equipment: ' + err.message
+      });
+    }
+  },
+
+  /**
+   * Service Areas Management Page
+   */
+  getServiceAreas: async (req, res) => {
+    if (!req.session.adminId) {
+      return res.redirect('/admin/login');
+    }
+
+    try {
+      const admin = await Admin.findById(req.session.adminId);
+      const { ServiceArea } = require('../db');
+      
+      const serviceAreas = await ServiceArea.find().sort({ createdAt: -1 });
+      
+      res.render('admin/service-areas', {
+        pageTitle: 'Service Areas',
+        title: 'JC Rentals - Manage Service Areas',
+        adminName: `${admin.firstName} ${admin.lastName}`,
+        adminRole: admin.role,
+        isAdminLoggedIn: true,
+        currentPage: 'service-areas',
+        serviceAreas: serviceAreas
+      });
+    } catch (err) {
+      console.error('Service areas page error:', err);
+      res.redirect('/admin/login');
+    }
+  },
+
+  /**
+   * Add Service Area (postal code)
+   */
+  addServiceArea: async (req, res) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    try {
+      const { ServiceArea } = require('../db');
+      let { postalCode, city, province, deliveryFee } = req.body;
+
+      console.log('AddServiceArea - Input:', { postalCode, city, province, deliveryFee });
+
+      // Validate required fields
+      if (!postalCode || !city || !province) {
+        return res.status(400).json({
+          success: false,
+          message: 'Postal code, city, and province are required'
+        });
+      }
+
+      // Normalize postal code before validating
+      postalCode = postalCode.replace(/\s/g, '').toUpperCase();
+      
+      // Validate postal code format
+      if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(postalCode)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid postal code format. Use format like K0L1W0'
+        });
+      }
+
+      // Check if postal code already exists
+      const existing = await ServiceArea.findOne({ postalCode: postalCode });
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          message: 'This postal code already exists'
+        });
+      }
+
+      const serviceArea = new ServiceArea({
+        postalCode: postalCode,
+        city: city.trim(),
+        province: province.trim(),
+        deliveryFee: parseFloat(deliveryFee) || 15.00
+      });
+
+      console.log('ServiceArea object before save:', serviceArea);
+
+      await serviceArea.save();
+
+      console.log('ServiceArea saved successfully:', serviceArea);
+
+      res.json({
+        success: true,
+        message: 'Service area added successfully',
+        serviceArea: serviceArea
+      });
+    } catch (err) {
+      console.error('Add service area error:', err);
+      console.error('Error message:', err.message);
+      console.error('Error stack:', err.stack);
+      
+      // Handle validation errors
+      if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(e => e.message);
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error: ' + messages.join(', ')
+        });
+      }
+
+      // Handle duplicate key error
+      if (err.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: 'This postal code already exists'
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Error adding service area: ' + (err.message || err.toString())
+      });
+    }
+  },
+
+  /**
+   * Update Service Area
+   */
+  updateServiceArea: async (req, res) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    try {
+      const { ServiceArea } = require('../db');
+      const { id } = req.params;
+      let { postalCode, city, province, deliveryFee, isActive } = req.body;
+
+      // Validate ID format
+      if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid service area ID'
+        });
+      }
+
+      const updatedData = {};
+      
+      if (postalCode) {
+        postalCode = postalCode.replace(/\s/g, '').toUpperCase();
+        
+        // Validate postal code format
+        if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(postalCode)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid postal code format. Use format like K0L1W0'
+          });
+        }
+        
+        updatedData.postalCode = postalCode;
+      }
+      
+      if (city) updatedData.city = city.trim();
+      if (province) updatedData.province = province.trim();
+      if (deliveryFee !== undefined) updatedData.deliveryFee = parseFloat(deliveryFee);
+      if (isActive !== undefined) updatedData.isActive = isActive;
+      
+      // Always update the timestamp
+      updatedData.updatedAt = new Date();
+
+      const serviceArea = await ServiceArea.findByIdAndUpdate(
+        id,
+        updatedData,
+        { new: true, runValidators: true }
+      );
+
+      if (!serviceArea) {
+        return res.status(404).json({
+          success: false,
+          message: 'Service area not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Service area updated successfully',
+        serviceArea: serviceArea
+      });
+    } catch (err) {
+      console.error('Update service area error:', err);
+      console.error('Error stack:', err.stack);
+      
+      // Handle validation errors
+      if (err.name === 'ValidationError') {
+        const messages = Object.values(err.errors).map(e => e.message);
+        return res.status(400).json({
+          success: false,
+          message: 'Validation error: ' + messages.join(', ')
+        });
+      }
+
+      // Handle duplicate key error
+      if (err.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: 'This postal code already exists'
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: 'Error updating service area: ' + (err.message || err.toString())
+      });
+    }
+  },
+
+  /**
+   * Delete Service Area
+   */
+  deleteServiceArea: async (req, res) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    try {
+      const { ServiceArea } = require('../db');
+      const { id } = req.params;
+
+      // Validate ID format
+      if (!id || !id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid service area ID'
+        });
+      }
+
+      const deleteResult = await ServiceArea.findByIdAndDelete(id);
+
+      if (!deleteResult) {
+        return res.status(404).json({
+          success: false,
+          message: 'Service area not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Service area deleted successfully'
+      });
+    } catch (err) {
+      console.error('Delete service area error:', err);
+      console.error('Error stack:', err.stack);
+      res.status(500).json({
+        success: false,
+        message: 'Error deleting service area: ' + (err.message || err.toString())
       });
     }
   }

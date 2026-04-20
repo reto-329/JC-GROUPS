@@ -11,7 +11,94 @@
   <link rel="stylesheet" href="/css/footer.css">
   <link rel="stylesheet" href="/css/profile.css">
   <link rel="stylesheet" href="/css/orders.css">
-</head>
+
+  <style>
+    .order-card {
+      transition: all 0.3s ease;
+    }
+
+    .order-card.collapsed .order-items,
+    .order-card.collapsed .order-footer {
+      display: none;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-icon {
+      font-size: 18px;
+      color: #666;
+      transition: transform 0.3s ease;
+    }
+
+    .order-card.collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+
+    .item-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-right: 12px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .item-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .item-details {
+      flex: 1;
+    }
+
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      white-space: nowrap;
+    }
+
+    .item-price {
+      font-weight: 600;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .item-badges {
+      display: flex;
+      gap: 8px;
+    }
+
+    .item-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .badge-return {
+      background: linear-gradient(135deg, #FF9800, #F57C00);
+      color: white;
+    }
+  </style></head>
 <body>
 
   <%- include('partials/header') %>
@@ -47,11 +134,14 @@
         <div class="orders-list">
       <% if (orders && orders.length > 0) { %>
         <% orders.forEach((order) => { %>
-          <div class="order-card" data-status="<%= order.status %>">
+          <div class="order-card collapsed" data-status="<%= order.status %>">
             <div class="order-header">
-              <div class="order-id">
-                <h3>Order #<%= order.orderNumber %></h3>
-                <span class="order-date"><%= new Date(order.createdAt).toLocaleDateString() %></span>
+              <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                <i class="fas fa-chevron-down toggle-icon"></i>
+                <div class="order-id">
+                  <h3>Order #<%= order.orderNumber %></h3>
+                  <span class="order-date"><%= new Date(order.createdAt).toLocaleDateString() %></span>
+                </div>
               </div>
               <div class="order-status">
                 <span class="status-badge status-<%= order.status %>"><%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %></span>
@@ -62,15 +152,34 @@
               <% if (order.items && order.items.length > 0) { %>
                 <% order.items.forEach((item) => { %>
                   <div class="item">
-                    <div class="item-info">
-                      <p class="item-name"><%= item.equipmentName %></p>
-                      <p class="item-quantity">Quantity: <%= item.quantity %></p>
-                      <p class="item-dates">
-                        <%= new Date(order.rentalPeriod.startDate).toLocaleDateString() %> - 
-                        <%= new Date(order.rentalPeriod.endDate).toLocaleDateString() %>
-                      </p>
+                    <% if (item.equipmentImage) { %>
+                      <img src="<%= item.equipmentImage %>" alt="<%= item.equipmentName %>" class="item-image">
+                    <% } %>
+                    <div class="item-content">
+                      <div class="item-details">
+                        <p class="item-name"><%= item.equipmentName %></p>
+                        <p class="item-quantity">Quantity: <%= item.quantity %></p>
+                        <p class="item-dates">
+                          <%= new Date(order.rentalPeriod.startDate).toLocaleDateString() %> - 
+                          <%= new Date(order.rentalPeriod.endDate).toLocaleDateString() %>
+                        </p>
+                      </div>
+                      <div class="item-right">
+                        <div class="item-price">$<%= item.subtotal.toFixed(2) %></div>
+                        <div class="item-badges">
+                          <% 
+                            const now = new Date();
+                            const endDate = new Date(order.rentalPeriod.endDate);
+                            const isRented = now < endDate;
+                          %>
+                          <% if (!isRented) { %>
+                            <span class="item-badge badge-return">
+                              <i class="fas fa-undo"></i> Return
+                            </span>
+                          <% } %>
+                        </div>
+                      </div>
                     </div>
-                    <div class="item-price">$<%= item.subtotal.toFixed(2) %></div>
                   </div>
                 <% }); %>
               <% } %>
@@ -122,6 +231,7 @@
   <%- include('partials/footer') %>
 
   <script>
+    // Filter button functionality
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -135,6 +245,19 @@
             card.style.display = 'none';
           }
         });
+      });
+    });
+
+    // Collapse/Expand functionality
+    document.querySelectorAll('.order-header').forEach(header => {
+      header.addEventListener('click', function(e) {
+        // Don't toggle if clicking on buttons
+        if (e.target.closest('.order-status, .action-btn, button')) {
+          return;
+        }
+        
+        const card = this.closest('.order-card');
+        card.classList.toggle('collapsed');
       });
     });
   </script>

@@ -322,29 +322,6 @@
       <p style="color: #666;">Complete your rental order safely</p>
     </div>
 
-    <!-- Service Area Notice -->
-    <div style="
-      background: #e7f3ff;
-      border: 2px solid #007bff;
-      color: #004085;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 30px;
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-    ">
-      <i class="fas fa-info-circle" style="font-size: 24px; flex-shrink: 0; margin-top: 2px;"></i>
-      <div>
-        <strong style="font-size: 16px; display: block; margin-bottom: 5px;">
-          <i class="fas fa-map-marker-alt"></i> Service Area
-        </strong>
-        <p style="margin: 0; font-size: 14px; line-height: 1.5;">
-          We currently deliver exclusively to the <strong>K0L 1W0</strong> postal code area. 
-          Please ensure your delivery address matches this postal code to proceed with checkout.
-        </p>
-      </div>
-    </div>
     <div class="step-indicator">
       <div class="step active">
         <div class="step-number">1</div>
@@ -406,14 +383,23 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Postal Code <span style="color: #dc3545;">*</span></label>
-                <input 
-                  type="text" 
+                <select
                   name="postalCode" 
                   id="postalCode"
-                  placeholder="K0L 1W0" 
                   required
                   style="text-transform: uppercase;"
                 >
+                  <option value="">-- Select a delivery area --</option>
+                  <% if (serviceAreas && serviceAreas.length > 0) { %>
+                    <% serviceAreas.forEach(area => { %>
+                      <option value="<%= area.postalCode %>">
+                        <%= area.postalCode %> (<%= area.city %>, <%= area.province %>) - $<%= area.deliveryFee.toFixed(2) %>
+                      </option>
+                    <% }); %>
+                  <% } else { %>
+                    <option value="" disabled>No service areas available</option>
+                  <% } %>
+                </select>
                 <div id="postalCodeWarning" style="
                   display: none;
                   margin-top: 8px;
@@ -556,19 +542,19 @@
         <div style="margin-top: 20px;">
           <div class="summary-row">
             <span>Subtotal</span>
-            <span>$<%= subtotal %></span>
+            <span id="subtotalDisplay">$<%= subtotal %></span>
           </div>
           <div class="summary-row">
             <span>Delivery Fee</span>
-            <span>$<%= deliveryFee %></span>
+            <span id="deliveryFeeDisplay">$<%= deliveryFee %></span>
           </div>
           <div class="summary-row">
             <span>HST (13%)</span>
-            <span>$<%= tax %></span>
+            <span id="taxDisplay">$<%= tax %></span>
           </div>
           <div class="summary-row total">
             <span>Total</span>
-            <span>
+            <span id="totalDisplay">
               $<%= total %>
               <span class="currency-badge">CAD</span>
             </span>
@@ -596,20 +582,43 @@
 
   <%- include('partials/footer') %>
 
+  <!-- Data container for service areas -->
+  <div id="data-container" data-service-areas='<%- JSON.stringify(serviceAreas || []) %>' data-subtotal="<%= subtotal %>" style="display: none;"></div>
+
   <script>
-    const ALLOWED_POSTAL_CODE = 'K0L1W0';
+    // Get service areas and pricing from controller
+    const container = document.getElementById('data-container');
+    const serviceAreas = JSON.parse(container.getAttribute('data-service-areas') || '[]');
+    const initialSubtotal = parseFloat(container.getAttribute('data-subtotal') || '0');
+    const TAX_RATE = 0.13; // 13% HST
 
-    // Validate postal code in real-time
-    document.getElementById('postalCode').addEventListener('input', function() {
-      const normalizedInput = this.value.replace(/\s/g, '').toUpperCase();
+    // Function to update pricing based on selected delivery fee
+    function updatePricing(deliveryFee) {
+      const tax = initialSubtotal * TAX_RATE;
+      const total = initialSubtotal + tax + deliveryFee;
+
+      // Update display with new values
+      document.getElementById('deliveryFeeDisplay').textContent = '$' + deliveryFee.toFixed(2);
+      document.getElementById('taxDisplay').textContent = '$' + tax.toFixed(2);
+      document.getElementById('totalDisplay').innerHTML = '$' + total.toFixed(2) + ' <span class="currency-badge">CAD</span>';
+    }
+
+    // Validate postal code and update delivery fee
+    document.getElementById('postalCode').addEventListener('change', function() {
       const warningDiv = document.getElementById('postalCodeWarning');
-      const warningMsg = document.getElementById('warningMessage');
-
-      if (normalizedInput && normalizedInput !== ALLOWED_POSTAL_CODE) {
+      
+      if (!this.value) {
         warningDiv.style.display = 'block';
-        warningMsg.textContent = `This postal code is outside our service area. We only deliver to K0L 1W0.`;
+        warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span id="warningMessage">Please select a delivery area</span>';
+        // Reset to 0 fee if no selection
+        updatePricing(0);
       } else {
         warningDiv.style.display = 'none';
+        // Find the selected service area and get its delivery fee
+        const selectedArea = serviceAreas.find(area => area.postalCode === this.value);
+        if (selectedArea) {
+          updatePricing(selectedArea.deliveryFee);
+        }
       }
     });
 
@@ -638,12 +647,12 @@
       e.preventDefault();
 
       // Validate postal code before submission
-      const postalCodeInput = document.getElementById('postalCode');
-      const normalizedPostalCode = postalCodeInput.value.replace(/\s/g, '').toUpperCase();
+      const postalCodeSelect = document.getElementById('postalCode');
+      const selectedPostalCode = postalCodeSelect.value.trim();
 
-      if (normalizedPostalCode !== ALLOWED_POSTAL_CODE) {
-        showAlert(`We only deliver to postal code K0L 1W0. Please verify your delivery address.`, 'error');
-        postalCodeInput.focus();
+      if (!selectedPostalCode) {
+        showAlert('Please select a delivery area', 'error');
+        postalCodeSelect.focus();
         return;
       }
 

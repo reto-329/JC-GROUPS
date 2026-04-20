@@ -119,6 +119,15 @@ router.put('/api/equipment/:id', requireAdminLogin, upload.single('image'), (req
 
 router.delete('/api/orders/:id', requireAdminLogin, AdminPagesController.deleteOrder);
 
+// Update order status
+router.put('/api/orders/:id/status', requireAdminLogin, AdminPagesController.updateOrderStatus);
+
 router.delete('/api/equipment/:id', requireAdminLogin, AdminPagesController.deleteEquipment);
+
+// Service Areas Routes
+router.get('/service-areas', requireAdminLogin, AdminPagesController.getServiceAreas);
+router.post('/api/service-areas', requireAdminLogin, AdminPagesController.addServiceArea);
+router.put('/api/service-areas/:id', requireAdminLogin, AdminPagesController.updateServiceArea);
+router.delete('/api/service-areas/:id', requireAdminLogin, AdminPagesController.deleteServiceArea);
 
 module.exports = router;
