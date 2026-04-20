@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./models/User');
 const Admin = require('./models/Admin');
 const Equipment = require('./models/Equipment');
+const ServiceArea = require('./models/ServiceArea');
 
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/jcrentals';
@@ -241,5 +242,6 @@ module.exports = {
   Equipment: EquipmentAPI,
   EquipmentModel: Equipment,
   Order: Order,
-  Cart: Cart
+  Cart: Cart,
+  ServiceArea: ServiceArea
 };

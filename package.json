@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed:admin": "node seedAdmin.js",
+    "seed:service-areas": "node seedServiceAreas.js",
+    "seed": "node seedAdmin.js && node seedServiceAreas.js"
   },
   "keywords": [
     "rentals",
