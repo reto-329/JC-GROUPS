@@ -14,11 +14,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session middleware
 app.use(session({
-  secret: 'jc-rentals-secret-key-change-in-production',
+  secret: process.env.SESSION_SECRET || 'jc-rentals-secret-key-change-in-production',
   resave: false,
   saveUninitialized: true,
   cookie: { 
-    secure: false, // Set to true if using HTTPS
+    secure: process.env.NODE_ENV === 'production', // Secure HTTPS only in production
+    httpOnly: true, // Prevent XSS attacks
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
