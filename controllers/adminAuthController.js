@@ -67,7 +67,22 @@ const AdminAuthController = {
       // Update last login
       await Admin.updateLastLogin(admin.id);
 
-      res.redirect('/admin/dashboard');
+      // Save session explicitly before redirecting
+      console.log('[ADMIN AUTH] Attempting to save admin session...');
+      console.log('[ADMIN AUTH] Session adminId:', req.session.adminId);
+      req.session.save((err) => {
+        if (err) {
+          console.error('[ADMIN AUTH] ❌ Session save error:', err);
+          return res.render('admin/login', {
+            title: 'JC Rentals - Admin Login',
+            message: 'Session error. Please try again.',
+            success: null,
+            isAdminLoggedIn: false
+          });
+        }
+        console.log('[ADMIN AUTH] ✓ Session saved successfully. Redirecting to /admin/dashboard');
+        res.redirect('/admin/dashboard');
+      });
     } catch (err) {
       console.error('Admin login error:', err);
       res.render('admin/login', {

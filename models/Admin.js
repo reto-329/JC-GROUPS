@@ -59,4 +59,11 @@ adminSchema.pre('save', async function() {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
+/**
+ * Static method to find by email
+ */
+adminSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email: email.toLowerCase() }).select('+password');
+};
+
 module.exports = mongoose.model('Admin', adminSchema);

@@ -2,12 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const helmet = require('helmet');
+const MongoStore = require('connect-mongo').default;
 require('./db'); // Connect to MongoDB
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Middleware
+// Security Middleware
+app.use(helmet()); // Add security headers
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,10 +19,19 @@ app.use(express.urlencoded({ extended: true }));
 const SESSION_TIMEOUT = parseInt(process.env.SESSION_TIMEOUT_MINUTES || '20') * 60 * 1000; // Default 20 minutes
 const WARNING_TIME = parseInt(process.env.SESSION_WARNING_MINUTES || '2') * 60 * 1000; // Warning 2 minutes before timeout
 
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/jcrentals';
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'jc-rentals-secret-key-change-in-production',
   resave: false,
   saveUninitialized: true,
+  store: new MongoStore({
+    mongoUrl: MONGODB_URI,
+    touchAfter: 24 * 3600, // Lazy session update (update every 24 hours if inactive)
+    ttl: 24 * 60 * 60, // Auto-delete sessions after 24 hours from MongoDB
+    autoRemove: 'interval', // Periodically remove expired sessions
+    autoRemoveInterval: 10 // Check for expired sessions every 10 minutes
+  }),
   cookie: { 
     secure: true, // Always true on Render (uses HTTPS)
     httpOnly: true, // Prevent XSS attacks
@@ -104,6 +116,53 @@ app.post('/api/session/extend', (req, res) => {
   res.json({ 
     message: 'Session extended',
     newRemainingTimeMs: SESSION_TIMEOUT
+  });
+});
+
+// 404 Error Handler - Handle undefined routes
+app.use((req, res) => {
+  res.status(404).render('error', { 
+    title: 'Page Not Found',
+    statusCode: 404,
+    message: 'The page you are looking for does not exist.',
+    isLoggedIn: !!req.session.userId
+  }, (err) => {
+    if (err) {
+      res.status(404).json({ 
+        statusCode: 404, 
+        message: 'The page you are looking for does not exist.' 
+      });
+    }
+  });
+});
+
+// Global Error Handler - Catch all errors
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode || 500;
+  const message = process.env.NODE_ENV === 'production' 
+    ? 'An error occurred. Please try again later.' 
+    : err.message;
+
+  console.error('ERROR:', {
+    statusCode,
+    message: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method
+  });
+
+  res.status(statusCode).render('error', { 
+    title: 'Error',
+    statusCode,
+    message,
+    isLoggedIn: !!req.session.userId
+  }, (renderErr) => {
+    if (renderErr) {
+      res.status(statusCode).json({ 
+        statusCode, 
+        message 
+      });
+    }
   });
 });
 

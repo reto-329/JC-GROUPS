@@ -112,7 +112,7 @@ userSchema.methods.getFullName = function() {
  * Static method to find by email
  */
 userSchema.statics.findByEmail = function(email) {
-  return this.findOne({ email: email.toLowerCase() });
+  return this.findOne({ email: email.toLowerCase() }).select('+password');
 };
 
 /**

@@ -121,9 +121,26 @@ const AuthController = {
       
       console.log('[CART SYNC] ========== SYNC COMPLETE ==========');
 
-      // Check if there's a redirect parameter from the form
-      const redirectTo = redirect === 'cart' ? '/cart' : '/profile';
-      res.redirect(redirectTo);
+      // Save session explicitly before redirecting
+      console.log('[AUTH] Attempting to save session...');
+      console.log('[AUTH] Session userId:', req.session.userId);
+      req.session.save((err) => {
+        if (err) {
+          console.error('[AUTH] ❌ Session save error:', err);
+          return res.render('login', {
+            title: 'JC Rentals - Login',
+            message: 'Session error. Please try again.',
+            success: null,
+            redirect: redirect || '',
+            isLoggedIn: false
+          });
+        }
+
+        console.log('[AUTH] ✓ Session saved successfully. Redirecting to /profile');
+        // Check if there's a redirect parameter from the form
+        const redirectTo = redirect === 'cart' ? '/cart' : '/profile';
+        res.redirect(redirectTo);
+      });
     } catch (err) {
       res.render('login', {
         title: 'JC Rentals - Login',
@@ -264,9 +281,22 @@ const AuthController = {
       
       console.log('[CART SYNC - REGISTER] ========== SYNC COMPLETE ==========');
 
-      // Check if there's a redirect parameter from the form
-      const redirectTo = redirect === 'cart' ? '/cart' : '/profile';
-      return res.redirect(redirectTo);
+      // Save session explicitly before redirecting
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.render('register', {
+            title: 'JC Rentals - Create Account',
+            message: 'Session error. Please try again.',
+            redirect: redirect || '',
+            isLoggedIn: false
+          });
+        }
+
+        // Check if there's a redirect parameter from the form
+        const redirectTo = redirect === 'cart' ? '/cart' : '/profile';
+        return res.redirect(redirectTo);
+      });
     } catch (err) {
       res.render('register', {
         title: 'JC Rentals - Create Account',
