@@ -4,7 +4,7 @@ const AdminAuthController = require('../controllers/adminAuthController');
 const AdminPagesController = require('../controllers/adminPagesController');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const CloudinaryStorage = require('multer-storage-cloudinary');
 
 // Configure Cloudinary
 cloudinary.config({
