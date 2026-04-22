@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="Find answers to common questions about JC Rentals equipment rental services, delivery, and policies.">
+  <meta name="keywords" content="FAQ, frequently asked questions, equipment rental, delivery, rentals">
+  <title>JC Rentals - FAQ | Frequently Asked Questions</title>
+  <link rel="icon" href="/images/Favicon.png">
+  
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- External Stylesheets -->
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/faq.css">
+</head>
+<body>
+
+<%- include('partials/header') %>
+
+<div class="faq-container">
+  <div class="faq-header">
+    <h1>Frequently Asked Questions</h1>
+    <p>Find answers to common questions about our rental services</p>
+  </div>
+
+  <div class="faq-content">
+    <!-- Equipment & Rentals Section -->
+    <div class="faq-section">
+      <h2>Equipment & Rentals</h2>
+      
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>What types of equipment do you offer for rent?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>We offer a wide range of construction and landscaping equipment including excavators, bulldozers, skid steer loaders, backhoes, compactors, and more. Browse our full equipment catalog on our <a href="/equipment">Services page</a>.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>How long can I rent equipment?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>We offer flexible rental periods from daily to monthly rentals. You can specify your rental duration when booking. Contact us for long-term rental rates and packages.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Do you provide equipment delivery?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Yes, we offer delivery services within our service areas. Delivery costs vary based on location and equipment type. Select your service area during checkout or contact us for a quote.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>What is included in the rental price?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Rental prices include equipment delivery, basic maintenance, and pickup. Fuel (for some equipment), operator services, and damage waivers are optional add-ons. Review the rental details for each item.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Can I reserve equipment in advance?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Yes! You can reserve equipment up to 90 days in advance. Create an account, add items to your cart, and proceed to checkout. You'll receive a confirmation with all rental details.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ordering & Billing Section -->
+    <div class="faq-section">
+      <h2>Ordering & Billing</h2>
+      
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>How do I place an order?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>1. Browse equipment on our Services page<br>2. Click "Rent" on the item you want<br>3. Select dates and quantity<br>4. Add to cart<br>5. Proceed to checkout and complete payment</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Do I need to create an account?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Yes, an account is required to place rental orders. This allows us to track your rentals, process payments securely, and maintain your rental history.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>What payment methods do you accept?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>We accept all major credit cards (Visa, Mastercard, American Express) and debit cards through our secure payment gateway. All transactions are encrypted for your security.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Can I modify or cancel my order?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Orders can be modified or cancelled up to 48 hours before the rental start date. Visit your <a href="/orders">Orders page</a> to manage your bookings or call us at <a href="tel:613-334-2571">613-334-2571</a>.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Do you offer bulk discounts?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Yes! We offer special pricing for large orders, long-term rentals, and contractor partnerships. Contact our sales team at <a href="tel:613-334-2571">613-334-2571</a> for a custom quote.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Service Areas Section -->
+    <div class="faq-section">
+      <h2>Service Areas & Delivery</h2>
+      
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>What areas do you service?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>We service Eastern Ontario and surrounding regions. Select your service area during checkout to check availability. Call us at <a href="tel:613-334-2571">613-334-2571</a> to confirm if we service your area.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>How much does delivery cost?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Delivery costs depend on equipment size, distance, and your service area. The cost is calculated at checkout and included in your total. Delivery is typically included for orders over $500.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>When will equipment be delivered?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>We deliver equipment on your specified start date. Please ensure the delivery location is accessible and safe. You'll receive a confirmation with a delivery time window.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Do you pick up equipment after rental?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Yes, we provide pickup service at the end of your rental period. The pickup date is confirmed in your rental agreement. Contact us if you need to arrange a different pickup time.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Policies & Support Section -->
+    <div class="faq-section">
+      <h2>Policies & Support</h2>
+      
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>What happens if equipment is damaged?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>We offer optional damage waiver coverage at checkout. If you don't have coverage, you're responsible for repair costs. Minor wear and tear is considered normal use and is not charged.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>What if I need to extend my rental?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Extensions are available based on equipment availability. Contact us as soon as possible to request an extension. You'll be charged the daily rate for additional rental days.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Do you offer insurance?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Yes, we offer optional damage and loss coverage that can be added to your rental. This protects you against unexpected costs. See the checkout page for details and pricing.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>How do I contact customer support?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>You can reach us by:<br>📞 Phone: <a href="tel:613-334-2571">613-334-2571</a><br>📧 Email: Contact us through our <a href="/contact">Contact page</a><br>🕒 Hours: Mon-Fri, 7am–5pm | Sat-Sun: Closed</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFAQ(this)">
+          <span>Is there an emergency services number?</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div class="faq-answer">
+          <p>Yes! Call <a href="tel:613-334-2571">613-334-2571</a> for emergency services or urgent rental needs. We're available to assist with emergency equipment needs during business hours and beyond.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Still Have Questions -->
+    <div class="faq-cta">
+      <h3>Still have questions?</h3>
+      <p>We're here to help! Contact us through our <a href="/contact">Contact page</a> or call <a href="tel:613-334-2571">613-334-2571</a></p>
+      <a href="/contact" class="btn-cta">Contact Us</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleFAQ(button) {
+  const item = button.parentElement;
+  
+  // Close all other items
+  document.querySelectorAll('.faq-item').forEach(el => {
+    if (el !== item) {
+      el.classList.remove('active');
+    }
+  });
+  
+  // Toggle current item
+  item.classList.toggle('active');
+}
+</script>
+
+<%- include('partials/footer') %>
+
+</body>
+</html>

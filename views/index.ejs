@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta name="description" content="JC RENTALS specializes in online equipment & tools rental for all building, landscaping & renovation needs. Our goal is to provide a convenient and stress free rental experience for our valued customers!">
+  <meta name="keywords" content="equipment rental, tool rental, scissor lift rental, boom lift rental, forklift rental, construction equipment rental">
+  <title>JC RENTALS - Specialized In Tool & Equipment Rental</title>
+  <link rel="icon" href="/images/Favicon.png">
+  
+  <!-- Font Awesome 6 (free, modern, matches the original's icon style) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
+  <!-- External Stylesheets -->
+  
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+
+  <!-- Postal Code Modal -->
+  <div id="postalCodeModal" class="postal-modal-overlay">
+    <div class="postal-modal-card">
+      <button class="postal-modal-close" onclick="closePostalCodeModal()" aria-label="Close">&times;</button>
+      <div class="postal-modal-icon-wrap">
+        <i class="fas fa-map-marker-alt"></i>
+      </div>
+      <h2 class="postal-modal-title">Delivery Area Check</h2>
+      <p class="postal-modal-subtitle">Enter your postal code to see available equipment in your area.</p>
+      <div id="postalErrorMessage" style="color: #dc3545; font-size: 14px; margin-bottom: 15px; display: none; background: #ffe5e5; padding: 10px; border-radius: 5px; text-align: center; font-weight: 500;"></div>
+      <div class="postal-input-wrap">
+        <i class="fas fa-location-dot postal-input-icon"></i>
+        <input type="text" id="postalCodeInput" class="postal-modal-input" placeholder="e.g. K0L1W0" maxlength="7" autocomplete="off">
+      </div>
+      <button id="postalCodeSubmitBtn" class="postal-modal-btn">Check Availability <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <%- include('partials/header') %>
+
+  <main>
+    <!-- Hero / Search Section (redesigned) -->
+    <div class="s01">
+      <form id="heroSearchForm">
+        <legend><span class="hero-label">Find Your</span> <span class="hero-highlight">Perfect Equipment</span></legend>
+        <p class="hero-subtitle">Find exactly what you need</p>
+        <div id="heroSearchErrorMessage" style="color: #dc3545; font-size: 14px; margin-bottom: 15px; display: none; background: #ffe5e5; padding: 10px; border-radius: 5px; text-align: center; font-weight: 500;"></div>
+        <div class="search-form-wrapper">
+          <div class="search-form-group location-group">
+            <label class="search-label">Location</label>
+            <div class="search-input-wrapper">
+              <i class="fas fa-map-marker-alt search-icon"></i>
+              <input type="text" id="heroLocationInput" placeholder="Enter postal code" class="search-form-input">
+            </div>
+          </div>
+          <div class="search-form-group equipment-group">
+            <label class="search-label">Equipment</label>
+            <div class="search-input-wrapper">
+              <i class="fas fa-tools search-icon"></i>
+              <input type="text" id="heroEquipmentInput" placeholder="Search equipment..." class="search-form-input">
+            </div>
+          </div>
+          <button type="button" class="search-submit-btn" id="heroSearchBtn">
+            <i class="fas fa-search"></i> Search
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Equipment Categories Grid (dynamic from database) -->
+    <div class="containereqipmenttab ourentalequipmentmargin" id="equipment-section">
+      <div class="product-tab">
+        <div class="category-grid">
+          <% if (equipment && equipment.length > 0) { %>
+            <% equipment.forEach((item) => { %>
+              <div class="col-sm-6 col-md-3">
+                <a href="#" onclick="openPostalCodeModal(event)" class="product" style="text-decoration: none;">
+                  <div class="product-thumb-info-image">
+                    <% if (item.image) { %>
+                      <img src="<%= item.image %>" alt="<%= item.name %>" style="width: 100%; height: 250px; object-fit: contain;">
+                    <% } else { %>
+                      <div style="width: 100%; height: 250px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; color: #999;">
+                        <i class="fas fa-image" style="font-size: 48px;"></i>
+                      </div>
+                    <% } %>
+                  </div>
+                  <div class="product-thumb-info-content-homepage">
+                    <%= item.name.toUpperCase() %> RENTALS
+                  </div>
+                </a>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">
+              <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+              <p>No equipment available at the moment.</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- About / Why Choose Us Section (two-column layout) -->
+    <div class="about-section">
+      <div class="container">
+        <div class="why-choose-wrapper">
+          <!-- Left Column: Heading & Intro -->
+          <div class="why-choose-left">
+            <h2>Why Choose JC RENTALS?</h2>
+            <div class="heading-underline"></div>
+            <p class="why-choose-intro">We provide premium equipment rental services with professional support and competitive pricing. Your project, our tools – simple, fast, reliable.</p>
+            <div class="about-cta">
+              <a href="#" onclick="openPostalCodeModal(event)" class="view-all-btn">View All Equipment</a>
+            </div>
+          </div>
+          
+          <!-- Right Column: Benefits Grid -->
+          <div class="why-choose-right">
+            <div class="benefits-grid-two-col">
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="fas fa-list-check"></i>
+                </div>
+                <h3>Wide Selection</h3>
+                <p>Wide selection of equipment</p>
+              </div>
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="fas fa-tag"></i>
+                </div>
+                <h3>Best Prices</h3>
+                <p>Competitive pricing</p>
+              </div>
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="fas fa-headset"></i>
+                </div>
+                <h3>Expert Support</h3>
+                <p>Professional support</p>
+              </div>
+              <div class="benefit-card">
+                <div class="benefit-icon">
+                  <i class="fas fa-mouse"></i>
+                </div>
+                <h3>Easy Booking</h3>
+                <p>Convenient online booking</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call to Action / Phone number (redesigned) -->
+    <div class="cta-section">
+      <div class="cta-container">
+        <h2 class="cta-heading">Ready to Get Started?</h2>
+        <p class="cta-subtext">Get the equipment you need. Contact us today for immediate assistance.</p>
+        <a href="tel:613-334-2571" class="cta-phone-button">
+          <i class="fas fa-phone"></i>
+          <span>CALL 613 334 2571</span>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <!-- Data container for service areas -->
+  <div id="data-container" data-service-areas='<%- JSON.stringify(serviceAreas || []) %>' style="display: none;"></div>
+
+  <script>
+    // Get dynamic service areas from server
+    const serviceAreas = JSON.parse(document.getElementById('data-container').getAttribute('data-service-areas') || '[]');
+    const allowedPostalCodes = serviceAreas
+      .filter(area => area.isActive)
+      .map(area => area.postalCode.replace(/\s/g, '').toUpperCase());
+
+    const modal = document.getElementById('postalCodeModal');
+    const postalCodeInput = document.getElementById('postalCodeInput');
+    const submitBtn = document.getElementById('postalCodeSubmitBtn');
+    const errorMessage = document.getElementById('postalErrorMessage');
+
+    // Hide on load
+    modal.style.display = 'none';
+
+    function openPostalCodeModal(event) {
+      event.preventDefault();
+      modal.style.display = 'flex';
+      postalCodeInput.focus();
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+    }
+
+    function closePostalCodeModal() {
+      modal.style.display = 'none';
+      postalCodeInput.value = '';
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+    }
+
+    function submitPostalCode() {
+      const postalCode = postalCodeInput.value.trim().toUpperCase().replace(/\s/g, '');
+      
+      if (!postalCode) {
+        errorMessage.textContent = 'Please enter a postal code';
+        errorMessage.style.display = 'block';
+        return;
+      }
+      
+      // Check if postal code is valid
+      const isValid = allowedPostalCodes.includes(postalCode);
+      
+      if (!isValid) {
+        const availableCodes = serviceAreas
+          .filter(area => area.isActive)
+          .map(area => `${area.postalCode} (${area.city})`)
+          .join(', ');
+        errorMessage.textContent = `We deliver to: ${availableCodes}`;
+        errorMessage.style.display = 'block';
+        return;
+      }
+      
+      // Valid postal code - proceed to equipment page
+      window.location.href = `/equipment?postalCode=${encodeURIComponent(postalCode)}`;
+    }
+
+    submitBtn.addEventListener('click', submitPostalCode);
+
+    // Allow Enter key to submit
+    postalCodeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitPostalCode();
+      }
+    });
+
+    // Close modal when clicking outside
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closePostalCodeModal();
+      }
+    });
+
+    // Hero Search Form Handler
+    const heroSearchBtn = document.getElementById('heroSearchBtn');
+    const heroSearchForm = document.getElementById('heroSearchForm');
+    const locationInput = document.getElementById('heroLocationInput');
+    const equipmentInput = document.getElementById('heroEquipmentInput');
+    const heroSearchErrorMessage = document.getElementById('heroSearchErrorMessage');
+
+    heroSearchBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const location = locationInput.value.trim().toUpperCase().replace(/\s/g, '');
+      const equipment = equipmentInput.value.trim();
+      
+      // Validate postal code - must be provided and valid
+      if (!location) {
+        heroSearchErrorMessage.textContent = 'Please enter a postal code';
+        heroSearchErrorMessage.style.display = 'block';
+        return;
+      }
+      
+      const isValid = allowedPostalCodes.includes(location);
+      if (!isValid) {
+        const availableCodes = serviceAreas
+          .filter(area => area.isActive)
+          .map(area => `${area.postalCode} (${area.city})`)
+          .join(', ');
+        heroSearchErrorMessage.textContent = `We deliver to: ${availableCodes}`;
+        heroSearchErrorMessage.style.display = 'block';
+        return;
+      }
+      
+      // Clear error message on successful validation
+      heroSearchErrorMessage.style.display = 'none';
+      
+      let url = '/equipment?';
+      const params = [];
+      
+      params.push(`postalCode=${encodeURIComponent(location)}`);
+      if (equipment) {
+        params.push(`search=${encodeURIComponent(equipment)}`);
+      }
+      
+      url += params.join('&');
+      window.location.href = url;
+    });
+
+    // Allow Enter key in search form to submit
+    [locationInput, equipmentInput].forEach(input => {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          heroSearchBtn.click();
+        }
+      });
+      
+      // Clear error message when user focuses on input
+      input.addEventListener('focus', () => {
+        heroSearchErrorMessage.style.display = 'none';
+      });
+    });
+  </script>
+
+</body>
+</html>

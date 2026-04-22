@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="icon" href="/images/Favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-contacts-page">
+  <div class="admin-wrapper">
+    <!-- Sidebar -->
+    <% locals.currentPage = 'contacts'; %>
+    <%- include('partials/sidebar') %>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Top Bar -->
+      <% locals.pageTitle = 'Contact Messages'; %>
+      <%- include('partials/topbar') %>
+
+      <!-- Content -->
+      <div class="admin-content">
+        <div class="content-header">
+          <h2>Contact Messages</h2>
+          <p class="text-muted">Manage customer inquiries and contact form submissions</p>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="stats-row">
+          <div class="stat-pill" style="--accent: #3b82f6; --accent-bg: #eff6ff;">
+            <div class="stat-pill-icon">
+              <i class="fas fa-envelope"></i>
+            </div>
+            <div class="stat-pill-body">
+              <div class="stat-pill-value"><%= stats.newCount %></div>
+              <div class="stat-pill-label">New Messages</div>
+            </div>
+          </div>
+
+          <div class="stat-pill" style="--accent: #8b5cf6; --accent-bg: #faf5ff;">
+            <div class="stat-pill-icon">
+              <i class="fas fa-envelope-open"></i>
+            </div>
+            <div class="stat-pill-body">
+              <div class="stat-pill-value"><%= stats.readCount %></div>
+              <div class="stat-pill-label">Read</div>
+            </div>
+          </div>
+
+          <div class="stat-pill" style="--accent: #10b981; --accent-bg: #f0fdf4;">
+            <div class="stat-pill-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-pill-body">
+              <div class="stat-pill-value"><%= stats.respondedCount %></div>
+              <div class="stat-pill-label">Responded</div>
+            </div>
+          </div>
+
+          <div class="stat-pill" style="--accent: #f59e0b; --accent-bg: #fffbf0;">
+            <div class="stat-pill-icon">
+              <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-pill-body">
+              <div class="stat-pill-value"><%= stats.totalCount %></div>
+              <div class="stat-pill-label">Total</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by name or email...">
+          </div>
+          <div class="filter-tabs">
+            <button class="ftab active" onclick="filterByStatus('')">All</button>
+            <button class="ftab" onclick="filterByStatus('new')">New</button>
+            <button class="ftab" onclick="filterByStatus('read')">Read</button>
+            <button class="ftab" onclick="filterByStatus('responded')">Responded</button>
+          </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="table-card">
+
+        <div class="table-scroll">
+          <table class="contacts-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Equipment</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (contacts && contacts.length > 0) { %>
+                <% contacts.forEach(contact => { %>
+                  <tr class="contact-row" data-contact-id="<%= contact._id %>" data-status="<%= contact.status %>">
+                    <td>
+                      <strong><%= contact.name %></strong>
+                    </td>
+                    <td>
+                      <a href="mailto:<%= contact.email %>" style="color: #3b82f6; text-decoration: none;"><%= contact.email %></a>
+                    </td>
+                    <td>
+                      <% if (contact.phone) { %>
+                        <a href="tel:<%= contact.phone %>" style="color: #3b82f6; text-decoration: none;"><%= contact.phone %></a>
+                      <% } else { %>
+                        <span style="color: #9ca3af;">—</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (contact.equipment) { %>
+                        <span class="eq-badge"><%= contact.equipment %></span>
+                      <% } else { %>
+                        <span style="color: #9ca3af;">—</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="date-cell"><%= new Date(contact.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) %></span>
+                    </td>
+                    <td>
+                      <span class="sbadge <%= contact.status %>">
+                        <% if (contact.status === 'new') { %>
+                          <i class="fas fa-star"></i> New
+                        <% } else if (contact.status === 'read') { %>
+                          <i class="fas fa-check"></i> Read
+                        <% } else { %>
+                          <i class="fas fa-check-double"></i> Responded
+                        <% } %>
+                      </span>
+                    </td>
+                    <td>
+                      <div class="row-actions">
+                        <button class="raction view-action" title="View Details" onclick="viewContact('<%= contact._id %>')">
+                          <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="raction delete-action" title="Delete" onclick="deleteContact('<%= contact._id %>')">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr class="no-data">
+                  <td colspan="7">
+                    <i class="fas fa-inbox"></i>
+                    <p>No contact messages yet.</p>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Contact Details Modal -->
+  <div id="contactModal" class="admin-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Message Details</h2>
+        <button class="modal-close" onclick="closeContactModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="contactDetailsBody">
+        <!-- Populated by JavaScript -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeContactModal()">Close</button>
+        <button class="btn-primary" onclick="markAsResponded()">Mark as Responded</button>
+      </div>
+    </div>
+  </div>
+
+  <%- include('partials/sidebar-script') %>
+
+  <script id="contactsJson" type="application/json"><%- JSON.stringify(contacts) %></script>
+
+  <script>
+    let contactsData = JSON.parse(document.getElementById('contactsJson').textContent);
+    let currentStatusFilter = '';
+
+    // Update stats in real-time
+    function updateStats() {
+      const newCount = contactsData.filter(c => c.status === 'new').length;
+      const readCount = contactsData.filter(c => c.status === 'read').length;
+      const respondedCount = contactsData.filter(c => c.status === 'responded').length;
+      const totalCount = contactsData.length;
+
+      document.querySelectorAll('.stat-pill-value')[0].textContent = newCount;
+      document.querySelectorAll('.stat-pill-value')[1].textContent = readCount;
+      document.querySelectorAll('.stat-pill-value')[2].textContent = respondedCount;
+      document.querySelectorAll('.stat-pill-value')[3].textContent = totalCount;
+    }
+
+    // Get status badge HTML
+    function getStatusBadgeHtml(status) {
+      const icons = {
+        'new': '<i class="fas fa-star"></i> New',
+        'read': '<i class="fas fa-check"></i> Read',
+        'responded': '<i class="fas fa-check-double"></i> Responded'
+      };
+      return `<span class="sbadge ${status}">${icons[status]}</span>`;
+    }
+
+    // View Contact Details
+    function viewContact(contactId) {
+      const contact = contactsData.find(c => c._id === contactId);
+      if (!contact) return;
+
+      // Mark as read when viewing
+      if (contact.status === 'new') {
+        updateStatusRealTime(contact._id, 'read');
+      }
+
+      const startDate = contact.startDate ? new Date(contact.startDate).toLocaleDateString('en-US') : 'Not specified';
+      const createdDate = new Date(contact.createdAt).toLocaleString('en-US');
+
+      let html = `
+        <div class="contact-details">
+          <div class="detail-section">
+            <h4>Contact Information</h4>
+            <div class="detail-row">
+              <label>Name:</label>
+              <span><strong>${contact.name}</strong></span>
+            </div>
+            <div class="detail-row">
+              <label>Email:</label>
+              <span><a href="mailto:${contact.email}">${contact.email}</a></span>
+            </div>
+            <div class="detail-row">
+              <label>Phone:</label>
+              <span>${contact.phone ? `<a href="tel:${contact.phone}">${contact.phone}</a>` : 'Not provided'}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>Equipment Request</h4>
+            <div class="detail-row">
+              <label>Equipment:</label>
+              <span>${contact.equipment || 'Not specified'}</span>
+            </div>
+            <div class="detail-row">
+              <label>Start Date:</label>
+              <span>${startDate}</span>
+            </div>
+            <div class="detail-row">
+              <label>Duration:</label>
+              <span>${contact.rentalDuration ? contact.rentalDuration + ' days' : 'Not specified'}</span>
+            </div>
+          </div>
+
+          <div class="detail-section">
+            <h4>Project Details</h4>
+            <div class="detail-row">
+              <span style="white-space: pre-wrap; color: #374151;">${contact.details || 'Not provided'}</span>
+            </div>
+          </div>
+
+          ${contact.message ? `
+            <div class="detail-section">
+              <h4>Additional Message</h4>
+              <div class="detail-row">
+                <span style="white-space: pre-wrap; color: #374151;">${contact.message}</span>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="detail-section" style="border: none;">
+            <h4>Submission</h4>
+            <div class="detail-row">
+              <label>Date:</label>
+              <span>${createdDate}</span>
+            </div>
+            <div class="detail-row">
+              <label>Status:</label>
+              <span class="sbadge ${contact.status}">
+                ${contact.status.toUpperCase()}
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+      const modalBody = document.getElementById('contactDetailsBody');
+      modalBody.innerHTML = html;
+      modalBody.dataset.contactId = contactId; // Store contact ID for later use
+      document.getElementById('contactModal').style.display = 'flex';
+    }
+
+    // Update Status in Real-Time
+    function updateStatusRealTime(contactId, newStatus) {
+      fetch(`/admin/api/contacts/${contactId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          // Update local data
+          const contact = contactsData.find(c => c._id === contactId);
+          if (contact) {
+            contact.status = newStatus;
+          }
+
+          // Update table row
+          const row = document.querySelector(`[data-contact-id="${contactId}"]`);
+          if (row) {
+            row.dataset.status = newStatus;
+            const statusCell = row.cells[5];
+            statusCell.innerHTML = getStatusBadgeHtml(newStatus);
+          }
+
+          // Update stats
+          updateStats();
+
+          // Re-apply filters
+          filterTable();
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+
+    // Delete Contact in Real-Time
+    function deleteContact(contactId) {
+      if (confirm('Delete this message?')) {
+        fetch(`/admin/api/contacts/${contactId}`, { method: 'DELETE' })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              // Remove from local data
+              contactsData = contactsData.filter(c => c._id !== contactId);
+
+              // Remove from table
+              const row = document.querySelector(`[data-contact-id="${contactId}"]`);
+              if (row) {
+                row.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => row.remove(), 300);
+              }
+
+              // Update stats
+              updateStats();
+
+              // Check if no rows left
+              const remainingRows = document.querySelectorAll('.contact-row').length;
+              if (remainingRows === 0) {
+                const tbody = document.querySelector('.contacts-table tbody');
+                tbody.innerHTML = `
+                  <tr class="no-data">
+                    <td colspan="7">
+                      <i class="fas fa-inbox"></i>
+                      <p>No contact messages yet.</p>
+                    </td>
+                  </tr>
+                `;
+              }
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+    }
+
+    // Search
+    document.getElementById('searchInput').addEventListener('keyup', filterTable);
+
+    function filterTable() {
+      const searchValue = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('.contact-row');
+
+      rows.forEach(row => {
+        const name = row.cells[0].textContent.toLowerCase();
+        const email = row.cells[1].textContent.toLowerCase();
+        const status = row.dataset.status;
+
+        const matchesSearch = name.includes(searchValue) || email.includes(searchValue);
+        const matchesStatus = !currentStatusFilter || status === currentStatusFilter;
+
+        row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+      });
+    }
+
+    function filterByStatus(status) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.ftab').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      filterTable();
+    }
+
+    // Close modal
+    function closeContactModal() {
+      document.getElementById('contactModal').style.display = 'none';
+    }
+
+    // Mark current contact as responded
+    function markAsResponded() {
+      const statusSpan = document.querySelector('#contactDetailsBody .detail-row:last-child .sbadge');
+      if (statusSpan && statusSpan.textContent.includes('Responded')) {
+        alert('This message is already marked as Responded.');
+        return;
+      }
+
+      const contact = contactsData[contactsData.length - 1]; // Get currently viewed contact
+      const currentContact = document.querySelector('.sbadge.responded, .sbadge.read, .sbadge.new');
+      
+      // Find the actual contact ID from modal content - we'll store it in a data attribute
+      const modalContent = document.getElementById('contactDetailsBody');
+      const storedContactId = modalContent.dataset.contactId;
+      
+      if (storedContactId) {
+        updateStatusRealTime(storedContactId, 'responded');
+        closeContactModal();
+      }
+    }
+
+    document.getElementById('contactModal').addEventListener('click', function(e) {
+      if (e.target === this) closeContactModal();
+    });
+  </script>
+
+  <style>
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* Stats Row */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-pill { display: flex; align-items: center; gap: 1rem; padding: 1.25rem; background: white; border-radius: 12px; border-left: 4px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    .stat-pill-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--accent-bg); color: var(--accent); border-radius: 8px; font-size: 1.25rem; }
+    .stat-pill-body { flex: 1; }
+    .stat-pill-value { font-size: 1.75rem; font-weight: 700; color: #1f2937; }
+    .stat-pill-label { font-size: .875rem; color: #6b7280; margin-top: .25rem; }
+
+    /* Toolbar */
+    .toolbar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; justify-content: space-between; }
+    .search-wrap { flex: 1; min-width: 250px; position: relative; }
+    .search-wrap i { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); color: #9ca3af; }
+    .search-wrap input { width: 100%; padding: .6rem .75rem .6rem 2.5rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: .875rem; }
+    .search-wrap input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+
+    /* Filter Tabs */
+    .filter-tabs { display: flex; gap: .5rem; }
+    .ftab { padding: .5rem 1rem; background: #f3f4f6; color: #6b7280; border: none; border-radius: 6px; cursor: pointer; font-size: .875rem; font-weight: 600; transition: all .2s; }
+    .ftab:hover { background: #e5e7eb; }
+    .ftab.active { background: #3b82f6; color: white; }
+
+    /* Table Card */
+    .table-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.1); overflow: hidden; }
+    .table-scroll { overflow-x: auto; }
+
+    /* Table */
+    .contacts-table { width: 100%; border-collapse: collapse; }
+    .contacts-table thead { background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+    .contacts-table th {
+      padding: .85rem 1rem;
+      text-align: left;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+    .contacts-table td {
+      padding: .9rem 1rem;
+      font-size: .875rem;
+      color: #1f2937;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: middle;
+    }
+    .contacts-table tbody tr:hover { background: #f9fafb; }
+    .contacts-table tbody tr:last-child td { border-bottom: none; }
+
+    /* Equipment Badge */
+    .eq-badge {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #374151;
+      padding: .25rem .6rem;
+      border-radius: 4px;
+      font-size: .8rem;
+      font-weight: 500;
+    }
+
+    /* Status Badge */
+    .sbadge { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .75rem; border-radius: 20px; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
+    .sbadge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .7; }
+    .sbadge.new { background: rgba(59,130,246,.12); color: #1d4ed8; }
+    .sbadge.read { background: rgba(168,85,247,.12); color: #7e22ce; }
+    .sbadge.responded { background: rgba(16,185,129,.12); color: #047857; }
+
+    /* Row Actions */
+    .row-actions { display: flex; gap: .4rem; }
+    .raction { width: 32px; height: 32px; border: 1px solid #e5e7eb; border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: .8rem; transition: all .2s; background: white; color: #6b7280; }
+    .raction:hover { background: #f9fafb; color: #1f2937; border-color: #d1d5db; }
+    .view-action:hover { color: #3b82f6; }
+    .delete-action:hover { color: #ef4444; }
+
+    /* No Data */
+    .no-data { text-align: center; }
+    .no-data td { padding: 3rem 1rem; }
+    .no-data i { font-size: 2rem; color: #d1d5db; margin-bottom: .5rem; }
+    .no-data p { color: #9ca3af; margin: 0; }
+
+    /* Contact Details */
+    .contact-details { display: flex; flex-direction: column; gap: 1.5rem; }
+    .detail-section { padding-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; }
+    .detail-section:last-child { border-bottom: none; padding-bottom: 0; }
+    .detail-section h4 { margin: 0 0 1rem 0; font-size: .9rem; font-weight: 700; color: #1f2937; text-transform: uppercase; letter-spacing: .4px; }
+    .detail-row { display: flex; justify-content: space-between; margin-bottom: .75rem; gap: 1rem; }
+    .detail-row label { font-weight: 600; color: #6b7280; font-size: .85rem; min-width: 100px; }
+    .detail-row span { color: #1f2937; }
+    .detail-row a { color: #3b82f6; text-decoration: none; }
+    .detail-row a:hover { text-decoration: underline; }
+
+    /* Modal */
+    .admin-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.5); align-items: center; justify-content: center; z-index: 1000; }
+    .admin-modal.active { display: flex; }
+    .modal-content { background: white; border-radius: 12px; box-shadow: 0 20px 25px rgba(0,0,0,.15); max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #e5e7eb; }
+    .modal-header h2 { margin: 0; font-size: 1.25rem; color: #1f2937; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; color: #6b7280; cursor: pointer; padding: 0; width: 32px; height: 32px; }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: .75rem; padding: 1.5rem; border-top: 1px solid #e5e7eb; }
+
+    /* Buttons */
+    .btn-secondary { background: #e5e7eb; color: #1f2937; border: none; padding: .6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all .2s; }
+    .btn-secondary:hover { background: #d1d5db; }
+    .btn-primary { background: #3b82f6; color: white; border: none; padding: .6rem 1.2rem; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all .2s; }
+    .btn-primary:hover { background: #2563eb; }
+  </style>
+
+</body>
+</html>

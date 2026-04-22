@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Secure Checkout - JC Rentals">
+  <title>Checkout - JC Rentals</title>
+  <link rel="icon" href="/images/Favicon.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/index.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <style>
+    .checkout-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .checkout-header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .checkout-header h1 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .checkout-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .checkout-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .checkout-form-section {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+
+    .form-section-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #007bff;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 15px;
+    }
+
+    .security-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px;
+      background: #e7f3ff;
+      border-radius: 6px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #004085;
+    }
+
+    .security-info i {
+      font-size: 18px;
+      color: #007bff;
+    }
+
+    .order-summary {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      height: fit-content;
+      position: sticky;
+      top: 20px;
+    }
+
+    .summary-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 15px 0;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-name {
+      font-weight: 600;
+      color: #333;
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    .item-price {
+      font-weight: 600;
+      color: #007bff;
+      white-space: nowrap;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .summary-row.total {
+      border-top: 2px solid #007bff;
+      padding-top: 15px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #007bff;
+    }
+
+    .btn-payment {
+      width: 100%;
+      padding: 15px;
+      margin-top: 30px;
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-payment:hover:not(:disabled) {
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .btn-payment:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      gap: 10px;
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #f0f0f0;
+      border-radius: 50%;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .step.active .step-number {
+      background: #007bff;
+      color: white;
+    }
+
+    .step-label {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .step.active .step-label {
+      color: #007bff;
+      font-weight: 600;
+    }
+
+    .test-card-info {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 15px;
+      font-size: 13px;
+    }
+
+    .test-card-info strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .test-card-info p {
+      margin: 5px 0;
+    }
+
+    .currency-badge {
+      background: #007bff;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/header') %>
+
+  <main class="checkout-container">
+    <div class="checkout-header">
+      <h1><i class="fas fa-lock"></i> Secure Checkout</h1>
+      <p style="color: #666;">Complete your rental order safely</p>
+    </div>
+
+    <div class="step-indicator">
+      <div class="step active">
+        <div class="step-number">1</div>
+        <div class="step-label">Delivery Address</div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-label">Payment</div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-label">Confirmation</div>
+      </div>
+    </div>
+
+    <div class="checkout-content">
+      <!-- Checkout Form -->
+      <div class="checkout-form-section">
+        <div id="alertMessage" class="alert"></div>
+
+        <form id="checkoutForm">
+          <!-- Delivery Address Section -->
+          <div id="deliverySection">
+            <h2 class="form-section-title">
+              <i class="fas fa-map-marker-alt"></i> Delivery Address
+            </h2>
+
+            <div class="form-group">
+              <label>Full Name <span style="color: #dc3545;">*</span></label>
+              <input type="text" name="fullName" value="<%= user.fullName || user.name || '' %>" required>
+            </div>
+
+            <div class="form-group">
+              <label>Email <span style="color: #dc3545;">*</span></label>
+              <input type="email" name="email" value="<%= user.email || '' %>" required>
+            </div>
+
+            <div class="form-group">
+              <label>Phone <span style="color: #dc3545;">*</span></label>
+              <input type="tel" name="phone" value="<%= user.phone || '' %>" required>
+            </div>
+
+            <div class="form-group">
+              <label>Street Address <span style="color: #dc3545;">*</span></label>
+              <input type="text" name="street" placeholder="123 Main St" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>City <span style="color: #dc3545;">*</span></label>
+                <input type="text" name="city" required>
+              </div>
+              <div class="form-group">
+                <label>Province/State <span style="color: #dc3545;">*</span></label>
+                <input type="text" name="state" value="ON" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Postal Code <span style="color: #dc3545;">*</span></label>
+                <select
+                  name="postalCode" 
+                  id="postalCode"
+                  required
+                  style="text-transform: uppercase;"
+                >
+                  <option value="">-- Select a delivery area --</option>
+                  <% if (serviceAreas && serviceAreas.length > 0) { %>
+                    <% serviceAreas.forEach(area => { %>
+                      <option value="<%= area.postalCode %>">
+                        <%= area.postalCode %> (<%= area.city %>, <%= area.province %>) - $<%= area.deliveryFee.toFixed(2) %>
+                      </option>
+                    <% }); %>
+                  <% } else { %>
+                    <option value="" disabled>No service areas available</option>
+                  <% } %>
+                </select>
+                <div id="postalCodeWarning" style="
+                  display: none;
+                  margin-top: 8px;
+                  padding: 10px;
+                  background: #fff3cd;
+                  border: 1px solid #ffeeba;
+                  color: #997404;
+                  border-radius: 4px;
+                  font-size: 13px;
+                ">
+                  <i class="fas fa-exclamation-triangle"></i> 
+                  <span id="warningMessage"></span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Country <span style="color: #dc3545;">*</span></label>
+                <input type="text" name="country" value="Canada" disabled>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Delivery Instructions (Optional)</label>
+              <textarea name="instructions" placeholder="Any special instructions for delivery..."></textarea>
+            </div>
+          </div>
+
+          <!-- Payment Section -->
+          <div id="paymentSection" style="margin-top: 40px;">
+            <h2 class="form-section-title">
+              <i class="fas fa-credit-card"></i> Payment Information
+            </h2>
+
+            <div class="form-group">
+              <label>Cardholder Name <span style="color: #dc3545;">*</span></label>
+              <input type="text" name="cardholderName" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+              <label>Card Number <span style="color: #dc3545;">*</span></label>
+              <input 
+                type="text" 
+                name="cardNumber" 
+                id="cardNumber"
+                placeholder="1234 5678 9012 3456" 
+                maxlength="19"
+                pattern="[0-9\s]{13,19}"
+                required
+              >
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Expiry Date <span style="color: #dc3545;">*</span></label>
+                <input 
+                  type="text" 
+                  name="expiry" 
+                  id="expiry"
+                  placeholder="MM/YY" 
+                  maxlength="5"
+                  pattern="[0-9]{2}/[0-9]{2}"
+                  required
+                >
+              </div>
+              <div class="form-group">
+                <label>CVV <span style="color: #dc3545;">*</span></label>
+                <input 
+                  type="text" 
+                  name="cvv" 
+                  id="cvv"
+                  placeholder="123" 
+                  maxlength="4"
+                  pattern="[0-9]{3,4}"
+                  required
+                >
+              </div>
+            </div>
+
+            <div class="security-info">
+              <i class="fas fa-shield-alt"></i>
+              <span>Your payment information is encrypted and secure. We never store full card details.</span>
+            </div>
+
+            <!-- Test Card Info (visible in development) -->
+            <% if (monerisEnvironment === 'test') { %>
+              <div class="test-card-info">
+                <strong><i class="fas fa-flask"></i> TEST MODE - Use Test Cards:</strong>
+                <p><strong>Valid Card:</strong> 4111 1111 1111 1111</p>
+                <p><strong>Declined Card:</strong> 4222 2222 2222 2220</p>
+                <p>Expiry: Any future date | CVV: Any 3 digits</p>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Terms Agreement -->
+          <div class="form-group" style="margin-top: 20px;">
+            <label style="display: flex; align-items: flex-start; gap: 10px;">
+              <input 
+                type="checkbox" 
+                name="agree" 
+                required
+                style="width: auto; margin-top: 3px;"
+              >
+              <span>I agree to the <a href="#" style="color: #007bff; text-decoration: none;">Terms of Service</a> and <a href="#" style="color: #007bff; text-decoration: none;">Privacy Policy</a></span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-payment">
+            <span class="loading-spinner" id="loadingSpinner"></span>
+            <span id="paymentBtnText">
+              <i class="fas fa-lock"></i> Complete Payment
+            </span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <div class="order-summary">
+        <div class="summary-title">
+          <i class="fas fa-receipt"></i> Order Summary
+        </div>
+
+        <!-- Cart Items -->
+        <% cartItems.forEach(function(item) { %>
+          <div class="order-item">
+            <div class="item-name">
+              <%= item.equipmentName %>
+              <div style="font-size: 12px; color: #999; font-weight: normal; margin-top: 4px;">
+                <i class="fas fa-calendar"></i>
+                <%= new Date(item.startDate).toLocaleDateString() %> - 
+                <%= new Date(item.endDate).toLocaleDateString() %>
+              </div>
+            </div>
+            <div class="item-price">
+              $<%= (item.subtotal || 0).toFixed(2) %>
+            </div>
+          </div>
+        <% }); %>
+
+        <!-- Pricing Summary -->
+        <div style="margin-top: 20px;">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="subtotalDisplay">$<%= subtotal %></span>
+          </div>
+          <div class="summary-row">
+            <span>Delivery Fee</span>
+            <span id="deliveryFeeDisplay">$<%= deliveryFee %></span>
+          </div>
+          <div class="summary-row">
+            <span>HST (13%)</span>
+            <span id="taxDisplay">$<%= tax %></span>
+          </div>
+          <div class="summary-row total">
+            <span>Total</span>
+            <span id="totalDisplay">
+              $<%= total %>
+              <span class="currency-badge">CAD</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Guarantees -->
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 13px; color: #666;">
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <i class="fas fa-check-circle" style="color: #28a745; flex-shrink: 0;"></i>
+            <span><strong>Secure Checkout:</strong> SSL encrypted payment processing</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <i class="fas fa-check-circle" style="color: #28a745; flex-shrink: 0;"></i>
+            <span><strong>Quick Confirmation:</strong> Order confirmed instantly</span>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <i class="fas fa-check-circle" style="color: #28a745; flex-shrink: 0;"></i>
+            <span><strong>Reliable Delivery:</strong> We ensure your equipment arrives on time</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <!-- Data container for service areas -->
+  <div id="data-container" data-service-areas='<%- JSON.stringify(serviceAreas || []) %>' data-subtotal="<%= subtotal %>" style="display: none;"></div>
+
+  <script>
+    // Get service areas and pricing from controller
+    const container = document.getElementById('data-container');
+    const serviceAreas = JSON.parse(container.getAttribute('data-service-areas') || '[]');
+    const initialSubtotal = parseFloat(container.getAttribute('data-subtotal') || '0');
+    const TAX_RATE = 0.13; // 13% HST
+
+    // Function to update pricing based on selected delivery fee
+    function updatePricing(deliveryFee) {
+      const tax = initialSubtotal * TAX_RATE;
+      const total = initialSubtotal + tax + deliveryFee;
+
+      // Update display with new values
+      document.getElementById('deliveryFeeDisplay').textContent = '$' + deliveryFee.toFixed(2);
+      document.getElementById('taxDisplay').textContent = '$' + tax.toFixed(2);
+      document.getElementById('totalDisplay').innerHTML = '$' + total.toFixed(2) + ' <span class="currency-badge">CAD</span>';
+    }
+
+    // Validate postal code and update delivery fee
+    document.getElementById('postalCode').addEventListener('change', function() {
+      const warningDiv = document.getElementById('postalCodeWarning');
+      
+      if (!this.value) {
+        warningDiv.style.display = 'block';
+        warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span id="warningMessage">Please select a delivery area</span>';
+        // Reset to 0 fee if no selection
+        updatePricing(0);
+      } else {
+        warningDiv.style.display = 'none';
+        // Find the selected service area and get its delivery fee
+        const selectedArea = serviceAreas.find(area => area.postalCode === this.value);
+        if (selectedArea) {
+          updatePricing(selectedArea.deliveryFee);
+        }
+      }
+    });
+
+    // Format card number with spaces
+    document.getElementById('cardNumber').addEventListener('input', function() {
+      let value = this.value.replace(/\s/g, '');
+      this.value = value.replace(/(\d{4})/g, '$1 ').trim();
+    });
+
+    // Format expiry date
+    document.getElementById('expiry').addEventListener('input', function() {
+      let value = this.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+      }
+      this.value = value;
+    });
+
+    // CVV input - numbers only
+    document.getElementById('cvv').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '');
+    });
+
+    // Form submission
+    document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      // Validate postal code before submission
+      const postalCodeSelect = document.getElementById('postalCode');
+      const selectedPostalCode = postalCodeSelect.value.trim();
+
+      if (!selectedPostalCode) {
+        showAlert('Please select a delivery area', 'error');
+        postalCodeSelect.focus();
+        return;
+      }
+
+      const btn = document.querySelector('.btn-payment');
+      const spinner = document.getElementById('loadingSpinner');
+      const btnText = document.getElementById('paymentBtnText');
+      const alertDiv = document.getElementById('alertMessage');
+
+      // Disable button and show loading state
+      btn.disabled = true;
+      spinner.style.display = 'inline-block';
+      btnText.style.display = 'none';
+
+      try {
+        // Parse form data
+        const formData = new FormData(this);
+        const expiry = formData.get('expiry').split('/');
+
+        const paymentData = {
+          cardNumber: formData.get('cardNumber').replace(/\s/g, ''),
+          expiryMonth: expiry[0],
+          expiryYear: '20' + expiry[1],
+          cvv: formData.get('cvv'),
+          deliveryAddress: {
+            street: formData.get('street'),
+            city: formData.get('city'),
+            state: formData.get('state'),
+            zipCode: formData.get('postalCode')
+          }
+        };
+
+        // Send payment request
+        const response = await fetch('/api/checkout/process-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paymentData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Show success message
+          showAlert(`Payment successful! Order #${result.orderNumber}`, 'success');
+          
+          // Redirect to confirmation page after 2 seconds
+          setTimeout(() => {
+            window.location.href = `/checkout/confirmation/${result.orderId}`;
+          }, 2000);
+        } else {
+          showAlert(result.message || 'Payment failed', 'error');
+          btn.disabled = false;
+          spinner.style.display = 'none';
+          btnText.style.display = 'inline-flex';
+        }
+      } catch (err) {
+        console.error('Payment error:', err);
+        showAlert('Error processing payment: ' + err.message, 'error');
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.style.display = 'inline-flex';
+      }
+    });
+
+    function showAlert(message, type) {
+      const alertDiv = document.getElementById('alertMessage');
+      alertDiv.textContent = message;
+      alertDiv.className = 'alert alert-' + type;
+      alertDiv.style.display = 'block';
+      alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  </script>
+
+</body>
+</html>

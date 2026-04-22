@@ -1,0 +1,97 @@
+<!-- Hamburger Menu Button -->
+<button class="sidebar-hamburger" id="sidebarHamburger" aria-label="Toggle sidebar" aria-controls="userSidebar">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- Sidebar Navigation -->
+<aside class="user-sidebar" id="userSidebar">
+  <div class="sidebar-header">
+    <div class="profile-avatar">
+      <div class="avatar-placeholder">
+        <% if (sidebarData && sidebarData.icon) { %>
+          <i class="<%= sidebarData.icon %>"></i>
+        <% } else { %>
+          <i class="fas fa-user"></i>
+        <% } %>
+      </div>
+    </div>
+    <h3><%= sidebarData && sidebarData.title ? sidebarData.title : 'Welcome Back!' %></h3>
+    <p class="user-email"><%= user.email %></p>
+    
+    <!-- Close button for mobile -->
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <nav class="profile-nav">
+    <a href="/profile" class="nav-item <%= activeTab === 'profile' ? 'active' : '' %>">
+      <i class="fas fa-user-circle"></i> Profile Information
+    </a>
+    <a href="/orders" class="nav-item <%= activeTab === 'orders' ? 'active' : '' %>">
+      <i class="fas fa-clipboard-list"></i> My Orders
+    </a>
+    <a href="/security" class="nav-item <%= activeTab === 'security' ? 'active' : '' %>">
+      <i class="fas fa-lock"></i> Security
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fas fa-cog"></i> Settings
+    </a>
+    <a href="#" class="nav-item">
+      <i class="fas fa-question-circle"></i> Help
+    </a>
+  </nav>
+
+  <a href="/logout" class="logout-btn">
+    <i class="fas fa-sign-out-alt"></i> Logout
+  </a>
+</aside>
+
+<!-- Sidebar Overlay (Mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<script>
+  // Sidebar toggle functionality
+  const hamburger = document.getElementById('sidebarHamburger');
+  const sidebar = document.getElementById('userSidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const closeBtn = document.getElementById('sidebarClose');
+
+  function toggleSidebar() {
+    sidebar.classList.toggle('active');
+    hamburger.classList.toggle('active');
+    overlay.classList.toggle('active');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('active');
+    hamburger.classList.remove('active');
+    overlay.classList.remove('active');
+  }
+
+  if (hamburger) {
+    hamburger.addEventListener('click', toggleSidebar);
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeSidebar);
+  }
+
+  if (overlay) {
+    overlay.addEventListener('click', closeSidebar);
+  }
+
+  // Close sidebar when clicking a nav item
+  document.querySelectorAll('.profile-nav .nav-item').forEach(item => {
+    item.addEventListener('click', closeSidebar);
+  });
+
+  // Close sidebar when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!sidebar.contains(e.target) && !hamburger.contains(e.target)) {
+      closeSidebar();
+    }
+  });
+</script>
