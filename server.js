@@ -8,7 +8,9 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 // Trust proxy - Important for production environments like Render
-app.set('trust proxy', 1);
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
