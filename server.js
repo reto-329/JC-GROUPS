@@ -7,6 +7,9 @@ require('./db'); // Connect to MongoDB
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+// Trust proxy - Important for production environments like Render
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -20,6 +23,7 @@ app.use(session({
   cookie: { 
     secure: process.env.NODE_ENV === 'production', // Secure HTTPS only in production
     httpOnly: true, // Prevent XSS attacks
+    sameSite: 'lax', // Prevent CSRF attacks
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
