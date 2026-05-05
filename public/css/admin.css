@@ -335,16 +335,24 @@
 }
 
 .admin-logo-mini {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   background: var(--primary-color);
-  border-radius: 10px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
   color: var(--primary-dark);
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.admin-logo-mini img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  display: block;
 }
 
 .admin-sidebar-header h2 {

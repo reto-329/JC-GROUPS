@@ -1,15 +1,14 @@
-const { User, Order, Cart, Equipment, ServiceArea } = require('../db');
-const axios = require('axios');
-const crypto = require('crypto');
+const { User, Order, Cart, Equipment, ServiceArea, EquipmentModel } = require('../db');
+const { createCheckoutSession } = require('../services/monerisService');
 
 /**
  * Checkout Controller
- * Handles checkout page rendering and payment processing with Moneris
+ * Handles checkout page rendering and order processing
  */
 const CheckoutController = {
   /**
    * Get checkout page
-   * Displays cart summary and payment form
+   * Displays cart summary and order form
    */
   getCheckout: async (req, res) => {
     try {
@@ -38,25 +37,15 @@ const CheckoutController = {
       const deliveryFee = 0; // Start at 0, updated when user selects area
       const total = subtotal + tax + deliveryFee;
 
-      // Generate Moneris transaction data
-      const orderId = `ORD-${Date.now()}`;
-      const sessionId = crypto.randomBytes(16).toString('hex');
-
       res.render('checkout', {
-        title: 'Checkout - JC Rentals',
+        title: 'Checkout - JC Equipment Rentals',
         cartItems: cart.items,
         user: user,
         subtotal: subtotal.toFixed(2),
         tax: tax.toFixed(2),
         deliveryFee: deliveryFee.toFixed(2),
         total: total.toFixed(2),
-        orderId: orderId,
-        sessionId: sessionId,
-        serviceAreas: serviceAreas,
-        // Moneris test credentials - CHANGE TO PRODUCTION
-        monerisStoreId: process.env.MONERIS_STORE_ID || 'store1',
-        monerisApiToken: process.env.MONERIS_API_TOKEN || 'yesguy',
-        monerisEnvironment: process.env.MONERIS_ENV || 'test'
+        serviceAreas: serviceAreas
       });
     } catch (err) {
       console.error('Checkout page error:', err);
@@ -68,86 +57,60 @@ const CheckoutController = {
   },
 
   /**
-   * Process payment with Moneris
-   * Handles the payment request and creates order on success
+   * Process order placement
+   * Moneris hosted checkout payment flow
    */
   postPayment: async (req, res) => {
+    let savedOrder = null;
     try {
       const userId = req.session.userId;
-      const { cardNumber, expiryMonth, expiryYear, cvv, deliveryAddress } = req.body;
+      const { deliveryAddress, billingAddress } = req.body;
 
       if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'User not authenticated' 
+        return res.status(401).json({
+          success: false,
+          message: 'User not authenticated'
         });
       }
 
-      // Validate postal code against service areas
-      const normalizedPostalCode = deliveryAddress.zipCode.replace(/\s/g, '').toUpperCase();
-      const serviceArea = await ServiceArea.findOne({ 
-        postalCode: normalizedPostalCode,
-        isActive: true 
+      const normalizedPostalCode = deliveryAddress.zipCode.toString().replace(/[^a-z0-9]/gi, '').toUpperCase();
+      let serviceArea = await ServiceArea.findOne({
+        normalizedCode: normalizedPostalCode,
+        isActive: true
       });
-      
+
       if (!serviceArea) {
-        // Get all available postal codes for error message
+        const allAreas = await ServiceArea.find({ isActive: true });
+        serviceArea = allAreas.find(area => {
+          const areaNormalized = area.postalCode.toString().replace(/[^a-z0-9]/gi, '').toUpperCase();
+          return areaNormalized === normalizedPostalCode;
+        });
+      }
+
+      if (!serviceArea) {
         const availableAreas = await ServiceArea.find({ isActive: true });
         const postalCodes = availableAreas.map(a => `${a.postalCode} (${a.city})`).join(', ');
-        
+
         return res.status(400).json({
           success: false,
           message: `Postal code ${deliveryAddress.zipCode} is not in our delivery area. Available areas: ${postalCodes}`
         });
       }
 
-      // Get cart
       const cart = await Cart.findOne({ userId });
-      
       if (!cart || !cart.items || cart.items.length === 0) {
-        return res.status(400).json({ 
-          success: false, 
-          message: 'Cart is empty' 
-        });
-      }
-
-      // Calculate total with service area delivery fee
-      const subtotal = cart.items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
-      const tax = subtotal * 0.13;
-      const deliveryFee = serviceArea.deliveryFee; // Use fee from service area
-      const total = subtotal + tax + deliveryFee;
-
-      // Get user
-      const user = await User.findById(userId);
-
-      // Prepare Moneris payment data
-      const paymentData = {
-        store_id: process.env.MONERIS_STORE_ID || 'store1',
-        api_token: process.env.MONERIS_API_TOKEN || 'yesguy',
-        processing_country_code: 'CA',
-        type: 'purchase',
-        pan: cardNumber.replace(/\s/g, ''),
-        expdate: `${expiryMonth}${expiryYear.slice(-2)}`,
-        cvd_value: cvv,
-        cvd_indicator: '1',
-        amount: Math.round(total * 100), // Amount in cents
-        order_id: `ORD-${Date.now()}`,
-        cust_id: userId.toString(),
-        email: user.email,
-        crypt_type: '7'
-      };
-
-      // Send payment to Moneris
-      const monerisResponse = await processMonerisPayment(paymentData);
-
-      if (!monerisResponse.success) {
         return res.status(400).json({
           success: false,
-          message: monerisResponse.message || 'Payment failed'
+          message: 'Cart is empty'
         });
       }
 
-      // Create order from cart
+      const subtotal = cart.items.reduce((sum, item) => sum + (item.subtotal || 0), 0);
+      const tax = subtotal * 0.13;
+      const deliveryFee = serviceArea.deliveryFee;
+      const total = subtotal + tax + deliveryFee;
+      const user = await User.findById(userId);
+
       const startDate = cart.items[0]?.startDate;
       const endDate = cart.items[0]?.endDate;
       const rentalDays = startDate && endDate
@@ -163,44 +126,125 @@ const CheckoutController = {
           days: rentalDays
         },
         totalAmount: total,
-        status: 'confirmed',
-        paymentStatus: 'paid',
+        status: 'pending',
+        paymentStatus: 'pending',
         paymentMethod: 'credit_card',
         deliveryAddress: deliveryAddress,
-        notes: `Payment confirmed with Moneris. Reference: ${monerisResponse.transactionId}`
+        billingAddress: billingAddress || deliveryAddress,
+        notes: 'Awaiting Moneris payment authorization'
       });
 
       const savedOrder = await order.save();
 
-      // Update equipment stock for each item in the order
-      for (const item of cart.items) {
-        await Equipment.findByIdAndUpdate(
-          item.equipmentId,
-          { $inc: { stock: -item.quantity } },
-          { new: true }
-        );
-        console.log(`[ORDER] Updated stock for equipment ${item.equipmentName}: -${item.quantity}`);
-      }
+      const baseAppUrl = (process.env.APP_URL || `http://localhost:${process.env.PORT || 8000}`).replace(/\/$/, '');
+      const returnUrl = `${baseAppUrl}/checkout/moneris-return?orderId=${savedOrder._id}`;
+      const cancelUrl = `${returnUrl}&status=cancelled`;
 
-      // Clear the cart after successful order
-      await Cart.deleteOne({ userId });
+      const checkoutSession = await createCheckoutSession({
+        amount: total,
+        orderId: savedOrder._id.toString(),
+        orderNumber: savedOrder.orderNumber,
+        returnUrl,
+        cancelUrl,
+        billingAddress: billingAddress || deliveryAddress,
+        shippingAddress: deliveryAddress,
+        email: user?.email || '',
+        phone: user?.phone || ''
+      });
 
-      // Clear session cart
-      req.session.cartSynced = false;
+      savedOrder.monerisCheckoutId = checkoutSession.ticket;
+      await savedOrder.save();
 
       res.json({
         success: true,
-        message: 'Payment successful',
+        checkoutUrl: checkoutSession.checkoutUrl,
         orderId: savedOrder._id,
-        orderNumber: savedOrder.orderNumber,
-        transactionId: monerisResponse.transactionId
+        orderNumber: savedOrder.orderNumber
       });
 
     } catch (err) {
-      console.error('Payment processing error:', err);
+      console.error('Order processing error:', err);
+      if (savedOrder && savedOrder._id) {
+        try {
+          await Order.deleteOne({ _id: savedOrder._id });
+        } catch (cleanupErr) {
+          console.error('Failed to cleanup incomplete order:', cleanupErr);
+        }
+      }
       res.status(500).json({
         success: false,
-        message: 'Error processing payment: ' + err.message
+        message: 'Error processing order: ' + err.message
+      });
+    }
+  },
+
+  handleMonerisReturn: async (req, res) => {
+    try {
+      const { orderId, status, ticket } = req.query;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.redirect('/login?redirect=/checkout');
+      }
+
+      if (!orderId) {
+        return res.status(400).render('checkout-error', {
+          title: 'Payment Error',
+          message: 'Missing payment information from Moneris.',
+          returnUrl: '/checkout'
+        });
+      }
+
+      const order = await Order.findById(orderId);
+      if (!order || order.userId.toString() !== userId.toString()) {
+        return res.status(404).render('checkout-error', {
+          title: 'Order Not Found',
+          message: 'Unable to locate the order associated with this payment.',
+          returnUrl: '/checkout'
+        });
+      }
+
+      if (order.paymentStatus === 'paid') {
+        return res.redirect(`/checkout/confirmation/${order._id}`);
+      }
+
+      if (status !== 'cancelled') {
+        // Assume payment succeeded
+        order.paymentStatus = 'paid';
+        order.status = 'confirmed';
+        order.notes = 'Paid via Moneris Checkout.';
+        if (ticket) {
+          order.monerisCheckoutId = ticket;
+        }
+        await order.save();
+
+        for (const item of order.items) {
+          await EquipmentModel.findByIdAndUpdate(
+            item.equipmentId,
+            { $inc: { quantityAvailable: -item.quantity } },
+            { returnDocument: 'after' }
+          );
+        }
+
+        await Cart.deleteOne({ userId });
+        req.session.cartSynced = false;
+
+        return res.redirect(`/checkout/confirmation/${order._id}`);
+      } else {
+        // cancelled
+        const message = 'Payment was cancelled. Please try again.';
+        return res.status(400).render('checkout-error', {
+          title: 'Payment Failed',
+          message,
+          returnUrl: '/checkout'
+        });
+      }
+    } catch (err) {
+      console.error('Moneris return error:', err);
+      res.status(500).render('checkout-error', {
+        title: 'Payment Error',
+        message: 'Unable to verify payment status. Please contact support or try again.',
+        returnUrl: '/checkout'
       });
     }
   },
@@ -227,7 +271,7 @@ const CheckoutController = {
       }
 
       res.render('order-confirmation', {
-        title: 'Order Confirmation - JC Rentals',
+        title: 'Order Confirmation - JC Equipment Rentals',
         order: order
       });
     } catch (err) {
@@ -239,72 +283,5 @@ const CheckoutController = {
     }
   }
 };
-
-/**
- * Process payment with Moneris API
- * For this implementation, we're using a simulated response
- * In production, integrate with actual Moneris API
- */
-async function processMonerisPayment(paymentData) {
-  try {
-    console.log('[MONERIS PAYMENT] Processing payment:', {
-      orderId: paymentData.order_id,
-      amount: paymentData.amount / 100,
-      customerId: paymentData.cust_id
-    });
-
-    // For development/testing with Moneris test environment
-    if (process.env.MONERIS_ENV === 'test' || !process.env.MONERIS_ENV) {
-      // Simulate successful payment in test mode
-      // Valid test card: 4111111111111111
-      if (paymentData.pan === '4111111111111111' || paymentData.pan === '4222222222222220') {
-        console.log('[MONERIS PAYMENT] TEST MODE - Simulating successful payment');
-        return {
-          success: true,
-          transactionId: `TXN-${Date.now()}`,
-          message: 'Payment processed successfully'
-        };
-      } else {
-        console.log('[MONERIS PAYMENT] TEST MODE - Simulating failed payment');
-        return {
-          success: false,
-          message: 'Test card declined. Use 4111111111111111 or 4222222222222220'
-        };
-      }
-    }
-
-    // Production: Use actual Moneris API
-    // Below is a placeholder for actual Moneris API integration
-    const monerisUrl = 'https://chk.moneris.com/chk/purchase.php';
-
-    const response = await axios.post(monerisUrl, paymentData, {
-      timeout: 30000,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
-
-    // Parse Moneris response
-    if (response.data && response.data.response === '1') {
-      return {
-        success: true,
-        transactionId: response.data.trans_id,
-        message: 'Payment processed successfully'
-      };
-    } else {
-      return {
-        success: false,
-        message: response.data?.message || 'Payment declined'
-      };
-    }
-
-  } catch (err) {
-    console.error('[MONERIS PAYMENT] Error:', err.message);
-    return {
-      success: false,
-      message: 'Payment service error: ' + err.message
-    };
-  }
-}
 
 module.exports = CheckoutController;

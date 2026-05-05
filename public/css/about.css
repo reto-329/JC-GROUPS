@@ -136,6 +136,42 @@ img {
   letter-spacing: 0.5px;
 }
 
+.hero-hero-subtitle {
+  font-size: clamp(1rem, 1.4vw, 1.35rem);
+  color: #ffffff;
+  font-weight: 500;
+  margin: 1rem auto 2rem;
+  max-width: 640px;
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+}
+
+.hero-banner-copy {
+  display: inline-block;
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.25rem;
+  max-width: 560px;
+  text-align: center;
+  background: rgba(232, 244, 248, 0.95);
+  border-radius: 16px;
+  border-bottom: 3px solid #007bff;
+  color: #1e3a35;
+  font-family: 'Tungsten-Bold', sans-serif;
+  font-size: clamp(1rem, 1.4vw, 1.35rem);
+  line-height: 1.4;
+  letter-spacing: 0.75px;
+}
+
+.hero-hero-subtitle a {
+  color: #B7E35A;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.hero-hero-subtitle a:hover {
+  color: #ffffff;
+}
+
 .hero-cta {
   display: flex;
   justify-content: center;

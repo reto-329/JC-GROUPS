@@ -1,4 +1,4 @@
-# JC Rentals - MongoDB Setup Guide
+# JC Equipment Rentals - MongoDB Setup Guide
 
 ## Installation & Setup
 

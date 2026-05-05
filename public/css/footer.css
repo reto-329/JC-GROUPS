@@ -24,12 +24,18 @@
   display: block;
 }
 
-/* Address & Hours */
-.footer-company-info .address {
+/* Address, Service Area & Hours */
+.footer-company-info .address,
+.footer-company-info .service-area {
   font-size: 0.95rem;
   color: #ccc;
   line-height: 1.7;
   margin: 0 0 1rem;
+}
+
+.footer-company-info .service-area {
+  font-style: italic;
+  letter-spacing: 0.02em;
 }
 
 .footer-company-info .hours {

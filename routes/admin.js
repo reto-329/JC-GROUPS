@@ -52,7 +52,7 @@ const requireAdminLogin = (req, res, next) => {
 
 // Middleware to validate category - only for new category values on add, optional on edit
 const validateCategory = (req, res, next) => {
-  const ALLOWED_CATEGORIES = ['Tools', 'Machinery', 'Vehicles', 'Safety', 'Other'];
+  const ALLOWED_CATEGORIES = ['Excavators', 'Telehandlers', 'Skid Steers', 'Boom Lifts', 'Trailers', 'Hydrovac', 'Dozers', 'Pumps', 'Marine Equipment'];
   const category = req.body.category ? req.body.category.trim() : null;
   
   // For edits (PUT requests), category is optional - if not provided, keep existing
@@ -123,6 +123,9 @@ router.delete('/api/orders/:id', requireAdminLogin, AdminPagesController.deleteO
 router.put('/api/orders/:id/status', requireAdminLogin, AdminPagesController.updateOrderStatus);
 
 router.delete('/api/equipment/:id', requireAdminLogin, AdminPagesController.deleteEquipment);
+
+// Update equipment availability
+router.put('/api/equipment/:id/availability', requireAdminLogin, AdminPagesController.updateEquipmentAvailability);
 
 // Service Areas Routes
 router.get('/service-areas', requireAdminLogin, AdminPagesController.getServiceAreas);

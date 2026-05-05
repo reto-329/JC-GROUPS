@@ -56,7 +56,7 @@ const AdminPagesController = {
 
       res.render('admin/dashboard', {
         pageTitle: 'Dashboard',
-        title: 'JC Rentals - Admin Dashboard',
+        title: 'JC Equipment Rentals - Admin Dashboard',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
@@ -106,7 +106,7 @@ const AdminPagesController = {
       
       res.render('admin/users', {
         pageTitle: 'Users',
-        title: 'JC Rentals - Manage Users',
+        title: 'JC Equipment Rentals - Manage Users',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
@@ -136,7 +136,7 @@ const AdminPagesController = {
       
       res.render('admin/equipment', {
         pageTitle: 'Equipment',
-        title: 'JC Rentals - Manage Equipment',
+        title: 'JC Equipment Rentals - Manage Equipment',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
@@ -168,7 +168,7 @@ const AdminPagesController = {
 
       res.render('admin/orders', {
         pageTitle: 'Orders',
-        title: 'JC Rentals - Manage Orders',
+        title: 'JC Equipment Rentals - Manage Orders',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
@@ -220,7 +220,7 @@ const AdminPagesController = {
       const updatedOrder = await Order.findByIdAndUpdate(
         id,
         { status: status, updatedAt: new Date() },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!updatedOrder) {
@@ -280,7 +280,7 @@ const AdminPagesController = {
       const { Equipment } = require('../db');
       
       // Define allowed categories
-      const ALLOWED_CATEGORIES = ['Tools', 'Machinery', 'Vehicles', 'Safety', 'Other'];
+      const ALLOWED_CATEGORIES = ['Excavators', 'Telehandlers', 'Skid Steers', 'Boom Lifts', 'Trailers', 'Hydrovac', 'Dozers', 'Pumps', 'Marine Equipment'];
       const category = req.body.category ? req.body.category.trim() : null;
       
       console.log('Category value from form:', category);
@@ -320,6 +320,16 @@ const AdminPagesController = {
         manufacturer: req.body.manufacturer || '',
         model: req.body.model || ''
       };
+
+      // Parse specifications if provided (expects JSON string from FormData)
+      if (req.body.specs) {
+        try {
+          const parsed = typeof req.body.specs === 'string' ? JSON.parse(req.body.specs) : req.body.specs;
+          equipmentData.specifications = parsed;
+        } catch (err) {
+          console.warn('Invalid specs JSON:', err.message);
+        }
+      }
 
       console.log('Equipment data to save:', equipmentData);
       
@@ -384,6 +394,54 @@ const AdminPagesController = {
   },
 
   /**
+   * Update Equipment Availability
+   */
+  updateEquipmentAvailability: async (req, res) => {
+    if (!req.session.adminId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    try {
+      const { id } = req.params;
+      const { quantityAvailable } = req.body;
+
+      if (quantityAvailable === undefined) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'quantityAvailable is required' 
+        });
+      }
+
+      const EquipmentModel = require('../models/Equipment');
+      const equipment = await EquipmentModel.findByIdAndUpdate(
+        id,
+        { quantityAvailable: parseInt(quantityAvailable) },
+        { returnDocument: 'after', runValidators: true }
+      );
+
+      if (!equipment) {
+        return res.status(404).json({ 
+          success: false, 
+          message: 'Equipment not found' 
+        });
+      }
+
+      console.log(`[ADMIN] Updated availability for equipment ${id}: ${quantityAvailable}`);
+      res.json({ 
+        success: true, 
+        message: 'Availability updated successfully',
+        data: equipment
+      });
+    } catch (err) {
+      console.error('Update availability error:', err);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Error updating availability: ' + err.message
+      });
+    }
+  },
+
+  /**
    * Update Equipment
    */
   updateEquipment: async (req, res) => {
@@ -411,7 +469,7 @@ const AdminPagesController = {
       }
       
       // Validate category (only required if provided)
-      const ALLOWED_CATEGORIES = ['Tools', 'Machinery', 'Vehicles', 'Safety', 'Other'];
+      const ALLOWED_CATEGORIES = ['Excavators', 'Telehandlers', 'Skid Steers', 'Boom Lifts', 'Trailers', 'Hydrovac', 'Dozers', 'Pumps', 'Marine Equipment'];
       const category = req.body.category ? req.body.category.trim() : null;
       
       // Use provided category or keep existing one
@@ -457,6 +515,16 @@ const AdminPagesController = {
         model: req.body.model || ''
       };
 
+      // Parse specifications if provided
+      if (req.body.specs) {
+        try {
+          const parsed = typeof req.body.specs === 'string' ? JSON.parse(req.body.specs) : req.body.specs;
+          equipmentData.specifications = parsed;
+        } catch (err) {
+          console.warn('Invalid specs JSON on update:', err.message);
+        }
+      }
+
       console.log('Equipment data to update:', equipmentData);
       
       const result = await Equipment.update(equipmentId, equipmentData);
@@ -493,7 +561,7 @@ const AdminPagesController = {
       
       res.render('admin/service-areas', {
         pageTitle: 'Service Areas',
-        title: 'JC Rentals - Manage Service Areas',
+        title: 'JC Equipment Rentals - Manage Service Areas',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
@@ -528,19 +596,24 @@ const AdminPagesController = {
         });
       }
 
-      // Normalize postal code before validating
-      postalCode = postalCode.replace(/\s/g, '').toUpperCase();
-      
-      // Validate postal code format
-      if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(postalCode)) {
+      // Preserve raw user input but compute a normalized code for lookup/uniqueness
+      const rawPostal = postalCode.toString().trim();
+      const normalizedPostal = rawPostal.replace(/[^a-z0-9]/gi, '').toUpperCase();
+
+      // Validate accepted formats: Canadian (on normalized), US ZIP (on raw), or generic alphanumeric
+      const isCanadian = /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(normalizedPostal);
+      const isUS = /^\d{5}(-\d{4})?$/.test(rawPostal);
+      const isGeneric = /^[A-Z0-9]{3,10}$/.test(normalizedPostal);
+
+      if (!isCanadian && !isUS && !isGeneric) {
         return res.status(400).json({
           success: false,
-          message: 'Invalid postal code format. Use format like K0L1W0'
+          message: 'Invalid postal code. Accepts Canadian (A1A 1A1), US ZIP (12345 or 12345-6789), or alphanumeric codes.'
         });
       }
 
-      // Check if postal code already exists
-      const existing = await ServiceArea.findOne({ postalCode: postalCode });
+      // Check if postal code already exists (by normalized code)
+      const existing = await ServiceArea.findOne({ normalizedCode: normalizedPostal });
       if (existing) {
         return res.status(400).json({
           success: false,
@@ -549,7 +622,8 @@ const AdminPagesController = {
       }
 
       const serviceArea = new ServiceArea({
-        postalCode: postalCode,
+        postalCode: rawPostal,
+        normalizedCode: normalizedPostal,
         city: city.trim(),
         province: province.trim(),
         deliveryFee: parseFloat(deliveryFee) || 15.00
@@ -619,17 +693,28 @@ const AdminPagesController = {
       const updatedData = {};
       
       if (postalCode) {
-        postalCode = postalCode.replace(/\s/g, '').toUpperCase();
-        
-        // Validate postal code format
-        if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(postalCode)) {
+        const rawPostal = postalCode.toString().trim();
+        const normalizedPostal = rawPostal.replace(/[^a-z0-9]/gi, '').toUpperCase();
+
+        const isCanadian = /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(normalizedPostal);
+        const isUS = /^\d{5}(-\d{4})?$/.test(rawPostal);
+        const isGeneric = /^[A-Z0-9]{3,10}$/.test(normalizedPostal);
+
+        if (!isCanadian && !isUS && !isGeneric) {
           return res.status(400).json({
             success: false,
-            message: 'Invalid postal code format. Use format like K0L1W0'
+            message: 'Invalid postal code. Accepts Canadian (A1A 1A1), US ZIP (12345 or 12345-6789), or alphanumeric codes.'
           });
         }
-        
-        updatedData.postalCode = postalCode;
+
+        // Check for duplicate normalized code (and allow updating the same record)
+        const existing = await ServiceArea.findOne({ normalizedCode: normalizedPostal });
+        if (existing && existing._id.toString() !== id) {
+          return res.status(400).json({ success: false, message: 'This postal code already exists' });
+        }
+
+        updatedData.postalCode = rawPostal;
+        updatedData.normalizedCode = normalizedPostal;
       }
       
       if (city) updatedData.city = city.trim();
@@ -643,7 +728,7 @@ const AdminPagesController = {
       const serviceArea = await ServiceArea.findByIdAndUpdate(
         id,
         updatedData,
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
       );
 
       if (!serviceArea) {
@@ -751,7 +836,7 @@ const AdminPagesController = {
 
       res.render('admin/contacts', {
         pageTitle: 'Contact Messages',
-        title: 'JC Rentals - Contact Messages',
+        title: 'JC Equipment Rentals - Contact Messages',
         adminName: `${admin.firstName} ${admin.lastName}`,
         adminRole: admin.role,
         isAdminLoggedIn: true,
@@ -790,7 +875,7 @@ const AdminPagesController = {
       const updatedContact = await Contact.findByIdAndUpdate(
         contactId,
         { status: status },
-        { new: true }
+        { returnDocument: 'after' }
       );
 
       if (!updatedContact) {

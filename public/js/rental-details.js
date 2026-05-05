@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // Get dynamic service areas from data attribute
   const serviceAreasData = JSON.parse(container.dataset.serviceAreas || '[]');
   const allowedPostalCodes = serviceAreasData
-    .map(area => area.postalCode.replace(/\s/g, '').toUpperCase());
+    .map(area => area.postalCode.replace(/[^a-z0-9]/gi, '').toUpperCase());
 
   const rentalDaysInput = document.getElementById('rentalDays');
   const rentalQtyInput = document.getElementById('rentalQty');
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
       days,
       subtotal: totalAmount,
       totalAmount,
-      postalCode: postalCodeSelect.value.trim().toUpperCase(),
+      postalCode: postalCodeSelect.value.toString().replace(/[^a-z0-9]/gi, '').toUpperCase(),
       equipmentImage
     };
 

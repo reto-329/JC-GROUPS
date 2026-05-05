@@ -2,7 +2,7 @@
 
 ## Models Overview
 
-JC Rentals uses Mongoose models to define the database schema and structure. Each model represents a collection in MongoDB with validation, methods, and static functions.
+JC Equipment Rentals uses Mongoose models to define the database schema and structure. Each model represents a collection in MongoDB with validation, methods, and static functions.
 
 ## Available Models
 
@@ -76,7 +76,7 @@ Defines rental equipment items available for rent.
 {
   name: String (required),
   description: String,
-  category: String (enum: ['Tools', 'Machinery', 'Vehicles', 'Safety', 'Other']),
+  category: String (enum: ['Excavators', 'Telehandlers', 'Skid Steers', 'Boom Lifts', 'Trailers', 'Hydrovac', 'Dozers', 'Pumps', 'Marine Equipment']),
   dailyRate: Number (required),
   weeklyRate: Number,
   monthlyRate: Number,

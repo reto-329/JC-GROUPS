@@ -8,16 +8,32 @@ const serviceAreaSchema = new mongoose.Schema({
   postalCode: {
     type: String,
     required: [true, 'Postal code is required'],
-    unique: true,
-    uppercase: true,
     trim: true,
     validate: {
       validator: function(v) {
-        // Accept formats: K0L1W0 or K0L 1W0
-        return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(v.replace(/\s/g, ''));
+        if (!v) return false;
+        // Normalize for validation: remove non-alphanumeric and uppercase
+        const norm = v.toString().replace(/[^a-z0-9]/gi, '').toUpperCase();
+
+        // Canadian: A1A1A1 (with or without space)
+        const canadian = /^[A-Z]\d[A-Z]\d[A-Z]\d$/;
+        // US ZIP: 12345 or 12345-6789
+        const usZip = /^\d{5}(-\d{4})?$/;
+        // Generic fallback: alphanumeric between 3 and 10 chars
+        const generic = /^[A-Z0-9]{3,10}$/;
+
+        return canadian.test(norm) || usZip.test(v) || generic.test(norm);
       },
-      message: 'Invalid Canadian postal code format (e.g., K0L 1W0)'
+      message: 'Invalid postal code. Accepts Canadian (A1A 1A1), US ZIP (12345 or 12345-6789), or alphanumeric codes.'
     }
+  },
+  // Normalized variant used for lookups and uniqueness (stores uppercase alphanumerics only)
+  normalizedCode: {
+    type: String,
+    required: false,
+    unique: true,
+    trim: true,
+    index: true
   },
   city: {
     type: String,
@@ -46,6 +62,36 @@ const serviceAreaSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+});
+
+// Preserve user-entered `postalCode` but compute `normalizedCode` before saving
+serviceAreaSchema.pre('save', function() {
+  if (this.postalCode) {
+    this.normalizedCode = this.postalCode.toString().replace(/[^a-z0-9]/gi, '').toUpperCase();
+  }
+  this.updatedAt = new Date();
+});
+
+// Normalize postalCode for findOneAndUpdate / findByIdAndUpdate
+// For findOneAndUpdate / findByIdAndUpdate: compute normalizedCode from provided postalCode
+serviceAreaSchema.pre('findOneAndUpdate', function() {
+  const update = this.getUpdate();
+  if (!update) return;
+
+  const setTarget = update.$set || update;
+
+  if (setTarget.postalCode) {
+    setTarget.normalizedCode = setTarget.postalCode.toString().replace(/[^a-z0-9]/gi, '').toUpperCase();
+  }
+
+  // Ensure updatedAt is set
+  if (update.$set) {
+    update.$set = { ...update.$set, updatedAt: new Date() };
+  } else {
+    update.updatedAt = new Date();
+  }
+
+  this.setUpdate(update);
 });
 
 module.exports = mongoose.model('ServiceArea', serviceAreaSchema);

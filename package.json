@@ -1,7 +1,7 @@
 {
   "name": "jc-rentals",
   "version": "1.0.0",
-  "description": "JC Rentals - Equipment Rental Website",
+  "description": "JC Equipment Rentals - Equipment Rental Website",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -17,7 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.6.2",
+    "axios": "^1.15.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^1.41.3",
     "connect-mongo": "^6.0.0",

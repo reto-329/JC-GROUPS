@@ -1,5 +1,18 @@
 const { User, Order, Cart } = require('../db');
 
+const createSlug = (text) => {
+  return text
+    ? text.toString().toLowerCase().trim()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+    : '';
+};
+
+const addSlugToEquipment = (equipment) => {
+  return equipment.map(item => ({ ...item, slug: createSlug(item.name) }));
+};
+
 /**
  * Pages Controller
  * Handles page rendering and basic operations
@@ -12,21 +25,32 @@ const PagesController = {
     try {
       const { Equipment, ServiceArea } = require('../db');
       const equipment = await Equipment.findAll();
+      const equipmentWithSlug = equipment ? addSlugToEquipment(equipment) : [];
+      const limitedEquipment = equipmentWithSlug.slice(0, 16);
       const serviceAreas = await ServiceArea.find({ isActive: true });
       
-      // Limit to first 16 items
-      const limitedEquipment = equipment ? equipment.slice(0, 16) : [];
+      const groupedByCategory = {};
+      equipmentWithSlug.forEach(item => {
+        const category = item.category || 'Other';
+        if (!groupedByCategory[category]) {
+          groupedByCategory[category] = [];
+        }
+        groupedByCategory[category].push(item);
+      });
+      
       res.render('index', { 
-        title: 'JC Rentals - Home',
+        title: 'JC Equipment Rentals - Home',
         equipment: limitedEquipment,
-        serviceAreas: serviceAreas
+        serviceAreas: serviceAreas,
+        categories: groupedByCategory
       });
     } catch (err) {
       console.error('Home page error:', err);
       res.render('index', { 
-        title: 'JC Rentals - Home',
+        title: 'JC Equipment Rentals - Home',
         equipment: [],
-        serviceAreas: []
+        serviceAreas: [],
+        categories: {}
       });
     }
   },
@@ -35,7 +59,7 @@ const PagesController = {
    * About page
    */
   getAbout: (req, res) => {
-    res.render('about', { title: 'JC Rentals - About Us' });
+    res.render('about', { title: 'JC Equipment Rentals - About Us' });
   },
 
   /**
@@ -45,11 +69,12 @@ const PagesController = {
     try {
       const { Equipment } = require('../db');
       const equipment = await Equipment.findAll();
+      const equipmentWithSlug = equipment ? addSlugToEquipment(equipment) : [];
       
       // Group equipment by category
       const groupedByCategory = {};
-      if (equipment && equipment.length > 0) {
-        equipment.forEach(item => {
+      if (equipmentWithSlug && equipmentWithSlug.length > 0) {
+        equipmentWithSlug.forEach(item => {
           const category = item.category || 'Other';
           if (!groupedByCategory[category]) {
             groupedByCategory[category] = [];
@@ -59,14 +84,14 @@ const PagesController = {
       }
       
       res.render('equipment', { 
-        title: 'JC Rentals - Equipment Rental',
-        equipment: equipment || [],
+        title: 'JC Equipment Rentals - Equipment Rental',
+        equipment: equipmentWithSlug || [],
         categories: groupedByCategory
       });
     } catch (err) {
       console.error('Equipment page error:', err);
       res.render('equipment', { 
-        title: 'JC Rentals - Equipment Rental',
+        title: 'JC Equipment Rentals - Equipment Rental',
         equipment: [],
         categories: {}
       });
@@ -77,14 +102,14 @@ const PagesController = {
    * Contact page
    */
   getContact: (req, res) => {
-    res.render('contact', { title: 'JC Rentals - Contact Us' });
+    res.render('contact', { title: 'JC Equipment Rentals - Contact Us' });
   },
 
   /**
    * FAQ page
    */
   getFaq: (req, res) => {
-    res.render('faq', { title: 'JC Rentals - FAQ' });
+    res.render('faq', { title: 'JC Equipment Rentals - FAQ' });
   },
 
   /**
@@ -131,7 +156,7 @@ const PagesController = {
       delete req.session.successMessage; // Clear it after retrieval
 
       res.render('profile', { 
-        title: 'JC Rentals - My Profile', 
+        title: 'JC Equipment Rentals - My Profile', 
         user,
         isLoggedIn: true,
         successMessage,
@@ -180,22 +205,56 @@ const PagesController = {
         return res.status(404).json({ error: 'Equipment not found' });
       }
 
+      equipment.slug = createSlug(equipment.name);
+      const canonicalUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
       // Fetch active service areas
       console.log('Fetching service areas...');
       const serviceAreas = await ServiceArea.find({ isActive: true });
       console.log('Service areas found:', serviceAreas.length);
       
       res.render('rental-details', {
-        title: `Rent ${equipment.name} - JC Rentals`,
+        title: `Rent ${equipment.name} - JC Equipment Rentals`,
         equipment: equipment,
         serviceAreas: serviceAreas,
         isLoggedIn: !!req.session.userId,
-        userId: req.session.userId
+        userId: req.session.userId,
+        canonicalUrl
       });
     } catch (err) {
       console.error('Rental details error:', err);
       console.error('Error message:', err.message);
       console.error('Error stack:', err.stack);
+      res.status(500).json({ error: 'Error loading rental details: ' + err.message });
+    }
+  },
+
+  getRentalDetailsBySlug: async (req, res) => {
+    try {
+      const { Equipment, ServiceArea } = require('../db');
+      const slug = req.params.slug;
+      const equipmentList = await Equipment.findAll();
+      const equipment = equipmentList
+        .map(item => ({ ...item, slug: createSlug(item.name) }))
+        .find(item => item.slug === slug);
+
+      if (!equipment) {
+        return res.status(404).send('Equipment not found');
+      }
+
+      const canonicalUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+      const serviceAreas = await ServiceArea.find({ isActive: true });
+
+      res.render('rental-details', {
+        title: `Rent ${equipment.name} - JC Equipment Rentals`,
+        equipment,
+        serviceAreas,
+        isLoggedIn: !!req.session.userId,
+        userId: req.session.userId,
+        canonicalUrl
+      });
+    } catch (err) {
+      console.error('Rental details by slug error:', err);
       res.status(500).json({ error: 'Error loading rental details: ' + err.message });
     }
   },
@@ -220,7 +279,7 @@ const PagesController = {
       const orders = await Order.find({ userId: req.session.userId }).sort({ createdAt: -1 });
       
       res.render('orders', { 
-        title: 'JC Rentals - My Orders',
+        title: 'JC Equipment Rentals - My Orders',
         user,
         orders: orders || [],
         isLoggedIn: true 
@@ -245,7 +304,7 @@ const PagesController = {
         return res.redirect('/login');
       }
       res.render('security', { 
-        title: 'JC Rentals - Security',
+        title: 'JC Equipment Rentals - Security',
         user,
         isLoggedIn: true,
         message: null
@@ -456,7 +515,7 @@ const PagesController = {
       console.log('========== END CART ACCESS ==========\n');
       
       res.render('cart', { 
-        title: 'JC Rentals - Shopping Cart',
+        title: 'JC Equipment Rentals - Shopping Cart',
         cartItems: cartData?.items || [],
         totalAmount: cartData?.totalAmount || 0,
         isLoggedIn: isLoggedIn,
@@ -465,7 +524,7 @@ const PagesController = {
     } catch (err) {
       console.error('Cart fetch error:', err);
       res.render('cart', { 
-        title: 'JC Rentals - Shopping Cart',
+        title: 'JC Equipment Rentals - Shopping Cart',
         cartItems: [],
         totalAmount: 0,
         isLoggedIn: !!req.session.userId,

@@ -79,12 +79,34 @@
     width: 240px;
     height: 90px;
   }
+  
+  .logo {
+    width: 240px;
+    height: 90px;
+  }
+  
+  .logosize {
+    width: 240px !important;
+    height: 90px !important;
+    aspect-ratio: 240 / 90;
+  }
 }
 
 @media (max-width: 768px) {
   .navbar-header {
     width: 160px;
     height: 75px;
+  }
+  
+  .logo {
+    width: 160px;
+    height: 75px;
+  }
+  
+  .logosize {
+    width: 160px !important;
+    height: 75px !important;
+    aspect-ratio: 160 / 75;
   }
 }
 
@@ -93,19 +115,42 @@
     width: 120px;
     height: 60px;
   }
+  
+  .logo {
+    width: 120px;
+    height: 60px;
+  }
+  
+  .logosize {
+    width: 120px !important;
+    height: 60px !important;
+    aspect-ratio: 120 / 60;
+  }
 }
 
 .logo {
-  display: block;
+  display: flex;
   margin: 0;
-  width: 100%;
-  height: 100%;
+  width: 280px;
+  height: 100px;
+  overflow: hidden;
+  line-height: 0;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: white;
+  border: none;
+  padding: 0;
 }
 
 .logosize {
-  width: 100%;
-  height: 100%;
+  width: 280px !important;
+  height: 100px !important;
+  max-width: 280px;
+  max-height: 100px;
   object-fit: contain;
+  display: block;
+  aspect-ratio: 280 / 100;
 }
 
 .navbar-collapse {

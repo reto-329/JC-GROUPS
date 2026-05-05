@@ -64,7 +64,17 @@ const orderSchema = new mongoose.Schema({
     enum: ['credit_card', 'debit_card', 'bank_transfer', 'cash'],
     default: null
   },
+  monerisCheckoutId: {
+    type: String,
+    default: null
+  },
   deliveryAddress: {
+    street: String,
+    city: String,
+    state: String,
+    zipCode: String
+  },
+  billingAddress: {
     street: String,
     city: String,
     state: String,

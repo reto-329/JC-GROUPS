@@ -1,6 +1,6 @@
 # Cloudinary Setup Guide
 
-This guide explains how to set up Cloudinary for image uploads on JC Rentals.
+This guide explains how to set up Cloudinary for image uploads on JC Equipment Rentals.
 
 ## Why Cloudinary?
 
@@ -89,7 +89,7 @@ After uploading:
 - Images are uploaded directly to Cloudinary
 - **Automatic category validation** prevents invalid or duplicate folders
 - Images are organized in folders by category: `jc-rentals/equipment/{category}`
-- Each equipment category gets its own subfolder (Tools, Machinery, Vehicles, Safety, Other)
+- Each equipment category gets its own subfolder ('Excavators', 'Telehandlers', 'Skid Steers', 'Boom Lifts', 'Trailers', 'Hydrovac', 'Dozers', 'Pumps', 'Marine Equipment')
 - Only valid categories are allowed to prevent folder clutter in Cloudinary
 - Images get instant URLs (no need to deploy)
 - Images persist across app restarts/redeployments
@@ -112,15 +112,11 @@ After upload, category is validated again before saving to database:
 - Provides an additional safety layer
 
 ### Allowed Categories
-- **Tools** - Hand tools, power tools, etc.
-- **Machinery** - Heavy machinery, equipment
-- **Vehicles** - Trucks, forklifts, lifts
-- **Safety** - Safety gear, PPE
-- **Other** - Miscellaneous items
+-'Excavators', 'Telehandlers', 'Skid Steers', 'Boom Lifts', 'Trailers', 'Hydrovac', 'Dozers', 'Pumps', 'Marine Equipment'
 
 If you try to upload with an invalid category, you'll get an error:
 ```
-Invalid category. Allowed categories are: Tools, Machinery, Vehicles, Safety, Other
+Invalid category. Allowed categories are: 'Excavators', 'Telehandlers', 'Skid Steers', 'Boom Lifts', 'Trailers', 'Hydrovac', 'Dozers', 'Pumps', 'Marine Equipment'
 ```
 
 ## Folder Organization

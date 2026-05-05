@@ -25,6 +25,22 @@
   margin: 0;
 }
 
+.hero-banner-copy {
+  display: inline-block;
+  margin: 0 auto 1rem;
+  padding: 1rem 1.25rem;
+  max-width: 560px;
+  text-align: center;
+  background: rgba(232, 244, 248, 0.95);
+  border-radius: 16px;
+  border-bottom: 3px solid #007bff;
+  color: #1e3a35;
+  font-family: 'Tungsten-Bold', sans-serif;
+  font-size: clamp(1rem, 1.4vw, 1.35rem);
+  line-height: 1.4;
+  letter-spacing: 0.75px;
+}
+
 .contact-container {
   max-width: 1200px;
   margin: 0 auto;

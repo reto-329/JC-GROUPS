@@ -1,27 +1,24 @@
-# Moneris Payment Checkout Implementation Guide
+# Checkout Implementation Guide
 
 ## Overview
 
-Complete checkout system with Moneris payment integration has been implemented for JC Rentals. Users can now proceed from their cart to a secure checkout page where they provide delivery information and payment details.
+Complete checkout system has been implemented for JC Equipment Rentals. Users can now proceed from their cart to a checkout page where they provide delivery information and place orders for cash on delivery.
 
 ## Implementation Summary
 
 ### 1. **New Files Created**
 
 #### Controllers
-- **`controllers/checkoutController.js`** - Handles checkout flow and payment processing
+- **`controllers/checkoutController.js`** - Handles checkout flow and order processing
   - `getCheckout()` - Displays checkout page with cart summary
-  - `postPayment()` - Processes payment with Moneris
+  - `postPayment()` - Processes order placement (cash on delivery)
   - `getConfirmation()` - Shows order confirmation page
 
 #### Views
-- **`views/checkout.ejs`** - Secure checkout form with:
+- **`views/checkout.ejs`** - Checkout form with:
   - Delivery address form
-  - Payment card entry (Credit/Debit)
   - Order summary sidebar
   - Form validation
-  - Real-time card formatting
-  - Test card information (in test mode)
 
 - **`views/order-confirmation.ejs`** - Order confirmation page with:
   - Order number and confirmation details
@@ -42,16 +39,10 @@ router.get('/checkout/confirmation/:orderId', requireLogin, CheckoutController.g
 ```
 
 #### Configuration (`.env`)
-Added Moneris credentialsMoneris credentials:
-```
-MONERIS_STORE_ID=store1
-MONERIS_API_TOKEN=yesguy
-MONERIS_ENV=test  # Change to 'live' for production
-```
+No payment configuration required - orders are placed for cash on delivery.
 
 #### Dependencies (`package.json`)
-- Added `axios` for HTTP requests
-- Added `crypto` for secure transaction handling
+- No additional payment gateway dependencies required
 
 #### Cart View (`views/cart.ejs`)
 - Updated "Proceed to Checkout" button to redirect to `/checkout`
@@ -73,13 +64,6 @@ Checkout Page (/checkout)
 │   ├── City, State, Postal Code
 │   └── Delivery Instructions
 │
-├── Payment Information Form
-│   ├── Cardholder Name
-│   ├── Card Number (formatted: XXXX XXXX XXXX XXXX)
-│   ├── Expiry Date (MM/YY)
-│   ├── CVV (3-4 digits)
-│   └── Billing Postal Code
-│
 └── Order Summary (sidebar)
     ├── Rental Items
     ├── Pricing Breakdown
@@ -87,11 +71,7 @@ Checkout Page (/checkout)
     │   ├── Delivery Fee ($15.00)
     │   ├── HST/Tax (13%)
     │   └── Total Amount
-    └── Payment Button
-        ↓
-    Moneris Payment Processing
-        ↓
-    [SUCCESS] ✓
+    └── Place Order Button
         ↓
     Order Created in Database
         ↓
@@ -106,65 +86,30 @@ Checkout Page (/checkout)
     └── Support Information
 ```
 
-## Payment Processing
+## Order Processing
 
-### Moneris Integration Details
+### Cash on Delivery
 
-The implementation uses **two modes**:
+Orders are placed for cash on delivery. No payment processing is required at checkout.
 
-#### Test Mode (Development)
-- Store ID: `store1`
-- API Token: `yesguy`
-- Environment: `test`
-
-**Test Card Numbers:**
-- **Valid Card:** `4111 1111 1111 1111` → Payment succeeds
-- **Declined Card:** `4222 2222 2222 2220` → Payment denied
-- Expiry: Any future date
-- CVV: Any 3 digits
-
-#### Production Mode
-1. Get actual credentials from Moneris merchant account
-2. Update `.env`:
-   ```
-   MONERIS_STORE_ID=your_actual_store_id
-   MONERIS_API_TOKEN=your_actual_api_token
-   MONERIS_ENV=live
-   ```
-3. Real credit/debit cards will be processed
-
-### Payment Data Flow
+### Order Data Flow
 
 ```javascript
-// Client sends encrypted payment data
+// Client sends order data
 POST /api/checkout/process-payment
 {
-  cardNumber: "4111111111111111",
-  expiryMonth: "12",
-  expiryYear: "2026",
-  cvv: "123",
-  postalCode: "M1A1A1",
   deliveryAddress: {
     street: "123 Main St",
     city: "Toronto",
     state: "ON",
     zipCode: "M1A 1A1"
-  }
+  },
+  billingAddress: { ... }
 }
 
-// Server processes with Moneris
-Moneris API Request
-├── Store ID & Token (authenticated)
-├── Payment Details (tokenized)
-├── Amount (in cents)
-├── Order ID
-└── Customer Info
-
-// Moneris Response
-Response { success, transactionId, message }
-
-// On Success:
-1. Create Order record in MongoDB
+// Server processes order
+1. Validate delivery address
+2. Create Order record in MongoDB
    ├── userId
    ├── items (from Cart)
    ├── totalAmount
@@ -181,14 +126,14 @@ Response { success, transactionId, message }
 
 ### Order Model Updates
 The existing `Order` model now receives these fields:
-- `paymentStatus: "paid"` (instead of "pending")
-- `paymentMethod: "credit_card"`
-- `status: "confirmed"` (instead of "pending")
+- `paymentStatus: "pending"`
+- `paymentMethod: "cash_on_delivery"`
+- `status: "confirmed"`
 - `deliveryAddress` object populated from checkout form
-- `notes` includes Moneris transaction reference
+- `notes` set to indicate payment is due upon delivery
 
 ### Cart Model Usage
-- Cart items are transferred to Order upon successful payment
+- Cart items are transferred to Order upon checkout
 - Cart collection is cleared after order creation
 - Guest cart (`localStorage`) is synced to database before checkout
 
@@ -196,27 +141,21 @@ The existing `Order` model now receives these fields:
 
 ### Security Features
 ✓ Client-side form validation
-✓ Card number formatting (XXXX XXXX XXXX XXXX)
-✓ Expiry date formatting (MM/YY)
-✓ CVV numbers not stored on server
 ✓ HTTPS/SSL support ready
 ✓ Session-based authentication required
-✓ Moneris encrypted payment processing
 
 ### User Experience
 ✓ Step indicator showing checkout progress
-✓ Real-time card number formatting
 ✓ Responsive design (mobile-friendly)
-✓ Loading spinner during payment
+✓ Loading spinner during order placement
 ✓ Success/error messages
-✓ Automatic redirect to confirmation after payment
+✓ Automatic redirect to confirmation after order
 ✓ Order summary always visible (sticky sidebar)
 
 ### Order Management
 ✓ Unique order numbers (ORD-TIMESTAMP-COUNT)
 ✓ Complete order history
 ✓ Delivery address tracking
-✓ Payment confirmation with Moneris reference
 ✓ Order status timeline with dates
 
 ## Testing the Checkout
@@ -258,52 +197,36 @@ The existing `Order` model now receives these fields:
    Fill in delivery instructions (optional)
    ```
 
-6. **Enter Payment Information**
-   ```
-   Cardholder Name: Any name
-   Card Number: 4111 1111 1111 1111 (test valid)
-   Expiry: 12/26 (any future date)
-   CVV: 123 (any 3 digits)
-   Postal Code: M1A 1A1 (any postal code)
-   ```
-
-7. **Submit Payment**
+6. **Submit Order**
    ```
    Check: "I agree to Terms" checkbox
-   Click: "Complete Payment" button
+   Click: "Place Order" button
    Watch: Loading spinner appears
    ```
 
-8. **Verify Confirmation**
+7. **Verify Confirmation**
    ```
    Page shows: ✓ Order Confirmed!
    Order Number: ORD-XXXXX-1
-   Timeline shows: Payment Received ✓
+   Timeline shows: Order Placed ✓
    Items and delivery date displayed
    ```
 
-9. **Verify Database**
+8. **Verify Database**
    ```
    MongoDB:
    - Order created with status: "confirmed"
-   - paymentStatus: "paid"
+   - paymentStatus: "pending"
    - Items transferred from Cart
    - Cart collection cleared
    ```
 
 ### Test Scenarios
 
-#### Scenario 1: Successful Payment
+#### Scenario 1: Successful Order Placement
 ```
-Card: 4111 1111 1111 1111
-Expected: Payment succeeds, order created, redirection to confirmation
+Expected: Order succeeds, order created, redirection to confirmation
 ```
-
-#### Scenario 2: Failed Payment (Test Declined Card)
-```
-Card: 4222 2222 2222 2220
-Expected: Error message "Test card declined. Use 4111111111111111..."
-Payment status remains pending
 ```
 
 #### Scenario 3: Invalid Data
@@ -325,52 +248,10 @@ Clear cart and try: Access /checkout
 Expected: Redirect to /cart with empty message
 ```
 
-## Configuration for Production
+## Order Processing Configuration
 
-### 1. Get Moneris Credentials
-1. Visit: [Moneris Merchant Account](https://www3.moneris.com/)
-2. Sign up or login to existing account
-3. Navigate to: Settings → API/Integration
-4. Copy: Store ID and API Token
-5. Keep these **SECRET** - never commit to git
-
-### 2. Update Environment Variables
-```bash
-# .env file
-MONERIS_STORE_ID=your_production_store_id
-MONERIS_API_TOKEN=your_production_api_token
-MONERIS_ENV=live
-```
-
-### 3. Update Server Configuration
-```javascript
-// In checkoutController.js processMonerisPayment()
-// Ensure actual Moneris API endpoint is called:
-const monerisUrl = 'https://chk.moneris.com/chk/purchase.php';
-// NOT the test endpoint
-```
-
-### 4. Enable HTTPS
-```javascript
-// In server.js - set cookie secure flag
-cookie: { 
-  secure: true,  // HTTPS only
-  httpOnly: true, // JavaScript cannot access
-  maxAge: 24 * 60 * 60 * 1000
-}
-```
-
-### 5. Add Error Handling
-```javascript
-// Implement proper error logging
-// Use monitoring service (Sentry, LogRocket, etc.)
-// Set up alerts for payment failures
-```
-
-### 6. Compliance
-- ✓ PCI-DSS Compliance (uses Moneris)
-- ✓ GDPR Ready (user data management)
-- ✓ Canadian Privacy Laws (HST, postal codes)
+### Environment
+No payment gateway configuration is required. Orders are placed for cash on delivery.
 
 ## API Endpoints
 
@@ -379,26 +260,26 @@ cookie: {
 #### GET /checkout
 - **Authentication:** Required (Login)
 - **Purpose:** Display checkout page
-- **Response:** Renders checkout.ejs with cart summary
-- **Query Params:** None
+- **Response:** Renders `checkout.ejs` with cart summary
 - **Error Codes:**
   - 401: Not authenticated → Redirect to login
   - Empty cart → Redirect to cart page
 
 #### POST /api/checkout/process-payment
 - **Authentication:** Required (Login)
-- **Purpose:** Process payment and create order
+- **Purpose:** Place order and create checkout record
 - **Method:** POST
 - **Content-Type:** application/json
 - **Body:**
 ```json
 {
-  "cardNumber": "4111111111111111",
-  "expiryMonth": "12",
-  "expiryYear": "2026",
-  "cvv": "123",
-  "postalCode": "M1A 1A1",
   "deliveryAddress": {
+    "street": "123 Main St",
+    "city": "Toronto",
+    "state": "ON",
+    "zipCode": "M1A 1A1"
+  },
+  "billingAddress": {
     "street": "123 Main St",
     "city": "Toronto",
     "state": "ON",
@@ -410,17 +291,16 @@ cookie: {
 ```json
 {
   "success": true,
-  "message": "Payment successful",
+  "message": "Order placed successfully",
   "orderId": "507f1f77bcf86cd799439011",
-  "orderNumber": "ORD-1699564800000-1",
-  "transactionId": "TXN-1699564800000"
+  "orderNumber": "ORD-1699564800000-1"
 }
 ```
-- **Error Response (400/500):**
+- **Error Response:**
 ```json
 {
   "success": false,
-  "message": "Payment declined. Use 4111111111111111..."
+  "message": "Error processing order: Invalid delivery area"
 }
 ```
 
@@ -429,7 +309,7 @@ cookie: {
 - **Purpose:** Show order confirmation
 - **Parameters:**
   - `orderId` (MongoDB ObjectId)
-- **Response:** Renders order-confirmation.ejs
+- **Response:** Renders `order-confirmation.ejs`
 - **Error Codes:**
   - 401: Not authenticated
   - 404: Order not found or belongs to different user
@@ -461,15 +341,15 @@ cookie: {
   },
   totalAmount: 113.25,
   status: "confirmed",
-  paymentStatus: "paid",
-  paymentMethod: "credit_card",
+  paymentStatus: "pending",
+  paymentMethod: "cash_on_delivery",
   deliveryAddress: {
     street: "123 Main St",
     city: "Toronto",
     state: "ON",
     zipCode: "M1A 1A1"
   },
-  notes: "Payment confirmed with Moneris. Reference: TXN-1699564800000",
+  notes: "Order placed, payment due upon delivery",
   createdAt: Timestamp,
   updatedAt: Timestamp
 }
@@ -477,29 +357,24 @@ cookie: {
 
 ## Troubleshooting
 
-### Issue: "Moneris payment error"
-**Solution:** 
-1. Check `.env` has correct MONERIS_STORE_ID and MONERIS_API_TOKEN
-2. Verify MONERIS_ENV is set to 'test' for development
-3. Check server logs for detailed error message
-
-### Issue: Cart not clearing after payment
+### Issue: Order placement fails
 **Solution:**
-1. Verify `Cart.deleteOne()` in checkoutController
-2. Check userId is correctly passed
+1. Check the delivery address fields in the checkout form
+2. Verify the selected postal code matches an active service area
+3. Check server logs for detailed error messages
+
+### Issue: Cart not clearing after order placement
+**Solution:**
+1. Verify `Cart.deleteOne()` in `checkoutController.js`
+2. Check userId is correctly passed in the session
 3. Verify MongoDB connection is active
 
 ### Issue: Order confirmation page blank
 **Solution:**
-1. Check orderId in URL is valid ObjectId
-2. Verify order exists in database
-3. Ensure user is logged in (check session)
+1. Check `orderId` in the URL is a valid ObjectId
+2. Verify the order exists in the database
+3. Ensure the user is logged in (check session)
 
-### Issue: Test card always declined
-**Solution:**
-1. Use exactly: `4111 1111 1111 1111` (spaces optional)
-2. Check card number isn't being modified
-3. Verify MONERIS_ENV is 'test' not 'live'
 
 ### Issue: Form fields not submitting
 **Solution:**
@@ -531,16 +406,15 @@ cookie: {
 
 ## Support & Resources
 
-### Moneris Documentation
-- [Moneris Developer Docs](https://developer.moneris.com/)
-- [Moneris Test Cards](https://developer.moneris.com/en/Documentation/Testing)
-- [API Reference](https://developer.moneris.com/en/Documentation/v1)
+### Integration Documentation
+- [Express Documentation](https://expressjs.com/)
+- [EJS Templating Guide](https://ejs.co/)
+- [MongoDB Documentation](https://docs.mongodb.com/)
 
 ### Security Best Practices
 - [PCI DSS Compliance](https://www.pcisecuritystandards.org/)
-- [OWASP Payment Security](https://owasp.org/)
+- [OWASP Security Practices](https://owasp.org/)
 - [SSL/TLS Setup](https://letsencrypt.org/)
 
 ### Support Contacts
-- Moneris Support: support@moneris.com
-- JC Rentals Support: support@jcrentals.com
+- JC Equipment Rentals Support: support@jcrentals.com

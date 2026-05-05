@@ -14,8 +14,8 @@ async function seedServiceAreas() {
     await mongoose.connect(MONGODB_URI);
     console.log('✓ Connected to MongoDB\n');
 
-    // Check if K0L 1W0 already exists
-    const existing = await ServiceArea.findOne({ postalCode: 'K0L1W0' });
+    // Check if K0L 1W0 already exists (use normalized code)
+    const existing = await ServiceArea.findOne({ normalizedCode: 'K0L1W0' });
     if (existing) {
       console.log('✓ Default service area already exists:');
       console.log('  Postal Code:', existing.postalCode);

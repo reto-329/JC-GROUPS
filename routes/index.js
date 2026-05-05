@@ -25,6 +25,7 @@ router.use((req, res, next) => {
 router.get('/', PagesController.getHome);
 router.get('/about', PagesController.getAbout);
 router.get('/equipment', PagesController.getEquipment);
+router.get('/equipment/:slug', PagesController.getRentalDetailsBySlug);
 router.get('/equipment/:id/rent', PagesController.getRentalDetails);
 router.get('/contact', PagesController.getContact);
 router.get('/faq', PagesController.getFaq);
@@ -59,6 +60,7 @@ router.put('/api/cart/update/:id', requireLogin, PagesController.postUpdateCart)
 // Checkout Routes
 router.get('/checkout', requireLogin, CheckoutController.getCheckout);
 router.post('/api/checkout/process-payment', requireLogin, CheckoutController.postPayment);
+router.get('/checkout/moneris-return', requireLogin, CheckoutController.handleMonerisReturn);
 router.get('/checkout/confirmation/:orderId', requireLogin, CheckoutController.getConfirmation);
 
 // Contact Form API

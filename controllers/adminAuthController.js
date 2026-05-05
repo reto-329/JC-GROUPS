@@ -14,7 +14,7 @@ const AdminAuthController = {
       return res.redirect('/admin/dashboard');
     }
     res.render('admin/login', { 
-      title: 'JC Rentals - Admin Login', 
+      title: 'JC Equipment Rentals - Admin Login', 
       message: null,
       success: req.query.success || null,
       isAdminLoggedIn: false
@@ -29,7 +29,7 @@ const AdminAuthController = {
 
     if (!email || !password) {
       return res.render('admin/login', {
-        title: 'JC Rentals - Admin Login',
+        title: 'JC Equipment Rentals - Admin Login',
         message: 'Please provide both email and password',
         success: null,
         isAdminLoggedIn: false
@@ -41,7 +41,7 @@ const AdminAuthController = {
 
       if (!admin || !Admin.verifyPassword(password, admin.password)) {
         return res.render('admin/login', {
-          title: 'JC Rentals - Admin Login',
+          title: 'JC Equipment Rentals - Admin Login',
           message: 'Email or password is incorrect',
           success: null,
           isAdminLoggedIn: false
@@ -50,7 +50,7 @@ const AdminAuthController = {
 
       if (!admin.isActive) {
         return res.render('admin/login', {
-          title: 'JC Rentals - Admin Login',
+          title: 'JC Equipment Rentals - Admin Login',
           message: 'Your account has been deactivated',
           success: null,
           isAdminLoggedIn: false
@@ -71,7 +71,7 @@ const AdminAuthController = {
     } catch (err) {
       console.error('Admin login error:', err);
       res.render('admin/login', {
-        title: 'JC Rentals - Admin Login',
+        title: 'JC Equipment Rentals - Admin Login',
         message: 'An error occurred. Please try again.',
         success: null,
         isAdminLoggedIn: false

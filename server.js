@@ -38,9 +38,63 @@ const sessionConfig = {
 
 app.use(session(sessionConfig));
 
+const baseSiteUrl = process.env.SITE_URL || process.env.BASE_URL || 'https://rentals.jcgroups.ca';
+
+// Make request data available in all EJS views
+app.use((req, res, next) => {
+  res.locals.req = req;
+  res.locals.currentPath = req.path;
+  let canonicalUrl = `${baseSiteUrl}${req.path === '/' ? '' : req.path}`;
+  if (canonicalUrl.endsWith('/') && canonicalUrl !== `${baseSiteUrl}/`) {
+    canonicalUrl = canonicalUrl.slice(0, -1);
+  }
+  res.locals.canonicalUrl = canonicalUrl;
+  next();
+});
+
 // Set view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Helper for dynamic domain generation
+const getBaseUrl = (req) => {
+  const protocol = req.protocol;
+  const host = req.get('host');
+  return `${protocol}://${host}`;
+};
+
+const createSlug = (text) => {
+  return text
+    ? text.toString().toLowerCase().trim()
+      .replace(/&/g, ' and ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+    : '';
+};
+
+app.get('/robots.txt', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  res.type('text/plain');
+  res.send(`User-agent: *\nDisallow: /admin/\nAllow: /\nSitemap: ${baseUrl}/sitemap.xml\n`);
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  const { Equipment } = require('./db');
+  const equipment = await Equipment.findAll();
+  const equipmentUrls = (equipment || []).map(item => `${baseUrl}/equipment/${createSlug(item.name)}`);
+  const urls = [
+    `${baseUrl}/`,
+    `${baseUrl}/equipment`,
+    `${baseUrl}/contact`,
+    `${baseUrl}/about`,
+    `${baseUrl}/faq`,
+    ...equipmentUrls
+  ];
+
+  res.type('application/xml');
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(url => `  <url><loc>${url}</loc></url>`).join('\n')}\n</urlset>`);
+});
 
 // Routes
 const indexRoutes = require('./routes/index');

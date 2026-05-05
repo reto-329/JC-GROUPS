@@ -15,7 +15,7 @@ const AuthController = {
       return res.redirect('/profile');
     }
     res.render('login', { 
-      title: 'JC Rentals - Login', 
+      title: 'JC Equipment Rentals - Login', 
       message: null,
       success: req.query.success || null,
       redirect: req.query.redirect || '',
@@ -31,7 +31,7 @@ const AuthController = {
 
     if (!email || !password) {
       return res.render('login', {
-        title: 'JC Rentals - Login',
+        title: 'JC Equipment Rentals - Login',
         message: 'Please provide both email and password',
         success: null,
         redirect: redirect || '',
@@ -44,7 +44,7 @@ const AuthController = {
 
       if (!user || !User.verifyPassword(password, user.password)) {
         return res.render('login', {
-          title: 'JC Rentals - Login',
+          title: 'JC Equipment Rentals - Login',
           message: 'Email or password is incorrect',
           success: null,
           redirect: redirect || '',
@@ -126,7 +126,7 @@ const AuthController = {
       res.redirect(redirectTo);
     } catch (err) {
       res.render('login', {
-        title: 'JC Rentals - Login',
+        title: 'JC Equipment Rentals - Login',
         message: 'An error occurred. Please try again.',
         success: null,
         redirect: redirect || '',
@@ -143,7 +143,7 @@ const AuthController = {
       return res.redirect('/profile');
     }
     res.render('register', { 
-      title: 'JC Rentals - Create Account', 
+      title: 'JC Equipment Rentals - Create Account', 
       message: null,
       redirect: req.query.redirect || '',
       isLoggedIn: false
@@ -158,7 +158,7 @@ const AuthController = {
 
     if (!email || !password || !confirmPassword || !firstName || !lastName) {
       return res.render('register', {
-        title: 'JC Rentals - Create Account',
+        title: 'JC Equipment Rentals - Create Account',
         message: 'Please fill in all fields',
         redirect: redirect || '',
         isLoggedIn: false
@@ -167,7 +167,7 @@ const AuthController = {
 
     if (password !== confirmPassword) {
       return res.render('register', {
-        title: 'JC Rentals - Create Account',
+        title: 'JC Equipment Rentals - Create Account',
         message: 'Passwords do not match',
         redirect: redirect || '',
         isLoggedIn: false
@@ -176,7 +176,7 @@ const AuthController = {
 
     if (password.length < 6) {
       return res.render('register', {
-        title: 'JC Rentals - Create Account',
+        title: 'JC Equipment Rentals - Create Account',
         message: 'Password must be at least 6 characters',
         redirect: redirect || '',
         isLoggedIn: false
@@ -187,7 +187,7 @@ const AuthController = {
       const existing = await User.findByEmail(email);
       if (existing) {
         return res.render('register', {
-          title: 'JC Rentals - Create Account',
+          title: 'JC Equipment Rentals - Create Account',
           message: 'Email already registered',
           redirect: redirect || '',
           isLoggedIn: false
@@ -200,7 +200,7 @@ const AuthController = {
       req.session.userId = newUser.id;
       req.session.userEmail = newUser.email;
       req.session.userName = `${firstName} ${lastName}`;
-      req.session.successMessage = `Welcome to JC Rentals, ${firstName}! Your account has been created successfully.`;
+      req.session.successMessage = `Welcome to JC Equipment Rentals, ${firstName}! Your account has been created successfully.`;
 
       // Sync localStorage cart items to Cart collection if present
       console.log('[CART SYNC - REGISTER] ========== STARTING REGISTRATION SYNC ==========');
@@ -269,7 +269,7 @@ const AuthController = {
       return res.redirect(redirectTo);
     } catch (err) {
       res.render('register', {
-        title: 'JC Rentals - Create Account',
+        title: 'JC Equipment Rentals - Create Account',
         message: 'Error creating account. Please try again.',
         redirect: redirect || '',
         isLoggedIn: false
