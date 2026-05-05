@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Orders Management - JC Rentals Admin</title>
+  <title>Orders Management - JC Equipment Rentals Admin</title>
   <link rel="icon" href="/images/Favicon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="/css/admin.css">
@@ -818,7 +818,27 @@
         <div class="modal-section">
           <div class="modal-section-title"><i class="fas fa-dollar-sign"></i> Billing</div>
           <div class="modal-field"><label>Total Amount</label><span class="big-amount">$${order.totalAmount.toFixed(2)}</span></div>
+          <div class="modal-field"><label>Payment Status</label><span>${order.paymentStatus}</span></div>
+          <div class="modal-field"><label>Payment Method</label><span>${order.paymentMethod || '—'}</span></div>
         </div>
+        ${order.deliveryAddress ? `
+        <div class="modal-section">
+          <div class="modal-section-title"><i class="fas fa-truck"></i> Delivery Address</div>
+          <div class="modal-field"><label>Street</label><span>${order.deliveryAddress.street || '—'}</span></div>
+          <div class="modal-field"><label>City</label><span>${order.deliveryAddress.city || '—'}</span></div>
+          <div class="modal-field"><label>Province</label><span>${order.deliveryAddress.state || '—'}</span></div>
+          <div class="modal-field"><label>Postal Code</label><span>${order.deliveryAddress.zipCode || '—'}</span></div>
+        </div>
+        ` : ''}
+        ${order.billingAddress ? `
+        <div class="modal-section">
+          <div class="modal-section-title"><i class="fas fa-file-invoice-dollar"></i> Billing Address</div>
+          <div class="modal-field"><label>Street</label><span>${order.billingAddress.street || '—'}</span></div>
+          <div class="modal-field"><label>City</label><span>${order.billingAddress.city || '—'}</span></div>
+          <div class="modal-field"><label>Province</label><span>${order.billingAddress.state || '—'}</span></div>
+          <div class="modal-field"><label>Postal Code</label><span>${order.billingAddress.zipCode || '—'}</span></div>
+        </div>
+        ` : ''}
       `;
       document.getElementById('orderModal').classList.add('active');
     }

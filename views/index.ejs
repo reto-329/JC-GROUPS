@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <%- include('partials/canonical') %>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <meta name="description" content="JC RENTALS specializes in online equipment & tools rental for all building, landscaping & renovation needs. Our goal is to provide a convenient and stress free rental experience for our valued customers!">
-  <meta name="keywords" content="equipment rental, tool rental, scissor lift rental, boom lift rental, forklift rental, construction equipment rental">
-  <title>JC RENTALS - Specialized In Tool & Equipment Rental</title>
+  <meta name="description" content="Equipment Rentals in Ontario — Excavators, Telehandlers, Trailers, Marine Equipment, and heavy-duty construction tools with fast delivery across Eastern Ontario.">
+  <meta name="keywords" content="equipment rentals Ontario, excavator rental, telehandler rental, trailer rental, marine equipment rental, tool rental Ontario">
+  <title>JC Equipment Rentals - Specialized In Tool & Equipment Rental</title>
   <link rel="icon" href="/images/Favicon.png">
   
   <!-- Font Awesome 6 (free, modern, matches the original's icon style) -->
@@ -43,8 +44,13 @@
     <!-- Hero / Search Section (redesigned) -->
     <div class="s01">
       <form id="heroSearchForm">
-        <legend><span class="hero-label">Find Your</span> <span class="hero-highlight">Perfect Equipment</span></legend>
-        <p class="hero-subtitle">Find exactly what you need</p>
+        <legend><span class="hero-label">Equipment Rentals in</span> <span class="hero-highlight">Ontario</span></legend>
+        <p class="hero-subtitle">Excavators, Telehandlers, Trailers, Marine Equipment, and tools for every job.</p>
+        <h2 class="hero-hero-subtitle">
+          Heavy Equipment Rentals in Gilmour<br>
+          Fast & Free Delivery in Gilmour & Surrounding Areas<br>
+          📞 Call <a href="tel:613-334-2571">613-334-2571</a> to reserve today
+        </h2>
         <div id="heroSearchErrorMessage" style="color: #dc3545; font-size: 14px; margin-bottom: 15px; display: none; background: #ffe5e5; padding: 10px; border-radius: 5px; text-align: center; font-weight: 500;"></div>
         <div class="search-form-wrapper">
           <div class="search-form-group location-group">
@@ -58,7 +64,14 @@
             <label class="search-label">Equipment</label>
             <div class="search-input-wrapper">
               <i class="fas fa-tools search-icon"></i>
-              <input type="text" id="heroEquipmentInput" placeholder="Search equipment..." class="search-form-input">
+              <select id="heroEquipmentSelect" class="search-form-input" required>
+                <option value="">Select equipment category</option>
+                <% if (categories && Object.keys(categories).length > 0) { %>
+                  <% Object.keys(categories).forEach(category => { %>
+                    <option value="<%= category %>"><%= category %></option>
+                  <% }); %>
+                <% } %>
+              </select>
             </div>
           </div>
           <button type="button" class="search-submit-btn" id="heroSearchBtn">
@@ -66,6 +79,7 @@
           </button>
         </div>
       </form>
+      
     </div>
 
     <!-- Equipment Categories Grid (dynamic from database) -->
@@ -73,9 +87,13 @@
       <div class="product-tab">
         <div class="category-grid">
           <% if (equipment && equipment.length > 0) { %>
-            <% equipment.forEach((item) => { %>
+            <% 
+              // Shuffle and limit to 12 items
+              const shuffled = [...equipment].sort(() => 0.5 - Math.random()).slice(0, 12);
+            %>
+            <% shuffled.forEach((item) => { %>
               <div class="col-sm-6 col-md-3">
-                <a href="#" onclick="openPostalCodeModal(event)" class="product" style="text-decoration: none;">
+                <a href="#" onclick="requirePostalCodeBeforeEquipment(event, '<%= item.slug %>')" class="product" style="text-decoration: none; cursor: pointer;">
                   <div class="product-thumb-info-image">
                     <% if (item.image) { %>
                       <img src="<%= item.image %>" alt="<%= item.name %>" style="width: 100%; height: 250px; object-fit: contain;">
@@ -86,7 +104,7 @@
                     <% } %>
                   </div>
                   <div class="product-thumb-info-content-homepage">
-                    <%= item.name.toUpperCase() %> RENTALS
+                    <strong><%= item.name %></strong>
                   </div>
                 </a>
               </div>
@@ -107,11 +125,11 @@
         <div class="why-choose-wrapper">
           <!-- Left Column: Heading & Intro -->
           <div class="why-choose-left">
-            <h2>Why Choose JC RENTALS?</h2>
+            <h2>Why Choose JC Equipment Rentals?</h2>
             <div class="heading-underline"></div>
-            <p class="why-choose-intro">We provide premium equipment rental services with professional support and competitive pricing. Your project, our tools – simple, fast, reliable.</p>
+            <p class="why-choose-intro">JC Equipment Rentals provides equipment rentals in Gilmour, Bancroft, and across Ontario, including excavators, telehandlers, trailers, marine equipment, pumps, and work boats.</p>
             <div class="about-cta">
-              <a href="#" onclick="openPostalCodeModal(event)" class="view-all-btn">View All Equipment</a>
+              <a href="/equipment" class="view-all-btn">View All Equipment</a>
             </div>
           </div>
           
@@ -156,7 +174,7 @@
     <div class="cta-section">
       <div class="cta-container">
         <h2 class="cta-heading">Ready to Get Started?</h2>
-        <p class="cta-subtext">Get the equipment you need. Contact us today for immediate assistance.</p>
+        <p class="cta-subtext">Equipment Rentals in Gilmour, Ontario – Telehandlers, Boom Lifts, Trailers & Construction Equipment</p>
         <a href="tel:613-334-2571" class="cta-phone-button">
           <i class="fas fa-phone"></i>
           <span>CALL 613 334 2571</span>
@@ -175,18 +193,35 @@
     const serviceAreas = JSON.parse(document.getElementById('data-container').getAttribute('data-service-areas') || '[]');
     const allowedPostalCodes = serviceAreas
       .filter(area => area.isActive)
-      .map(area => area.postalCode.replace(/\s/g, '').toUpperCase());
+      .map(area => area.postalCode.replace(/[^a-z0-9]/gi, '').toUpperCase());
 
     const modal = document.getElementById('postalCodeModal');
     const postalCodeInput = document.getElementById('postalCodeInput');
     const submitBtn = document.getElementById('postalCodeSubmitBtn');
     const errorMessage = document.getElementById('postalErrorMessage');
 
+    // Store postal code in localStorage
+    let currentPostalCode = localStorage.getItem('selectedPostalCode') || '';
+
     // Hide on load
     modal.style.display = 'none';
 
-    function openPostalCodeModal(event) {
+    function requirePostalCodeBeforeEquipment(event, slug) {
       event.preventDefault();
+      const storedPostalCode = localStorage.getItem('selectedPostalCode') || '';
+      
+      if (storedPostalCode && allowedPostalCodes.includes(storedPostalCode)) {
+        // Valid postal code stored - navigate directly
+        window.location.href = `/equipment/${slug}`;
+      } else {
+        // No valid postal code - show modal
+        openPostalCodeModal(event);
+        window.equipmentSlugTarget = slug; // Store the target slug
+      }
+    }
+
+    function openPostalCodeModal(event) {
+      if (event) event.preventDefault();
       modal.style.display = 'flex';
       postalCodeInput.focus();
       errorMessage.style.display = 'none';
@@ -198,10 +233,11 @@
       postalCodeInput.value = '';
       errorMessage.style.display = 'none';
       errorMessage.textContent = '';
+      window.equipmentSlugTarget = null;
     }
 
     function submitPostalCode() {
-      const postalCode = postalCodeInput.value.trim().toUpperCase().replace(/\s/g, '');
+      const postalCode = postalCodeInput.value.toString().replace(/[^a-z0-9]/gi, '').toUpperCase();
       
       if (!postalCode) {
         errorMessage.textContent = 'Please enter a postal code';
@@ -222,8 +258,15 @@
         return;
       }
       
-      // Valid postal code - proceed to equipment page
-      window.location.href = `/equipment?postalCode=${encodeURIComponent(postalCode)}`;
+      // Valid postal code - store it
+      localStorage.setItem('selectedPostalCode', postalCode);
+      
+      // If equipment slug target is set, navigate to it; otherwise go to equipment page
+      if (window.equipmentSlugTarget) {
+        window.location.href = `/equipment/${window.equipmentSlugTarget}`;
+      } else {
+        window.location.href = `/equipment?postalCode=${encodeURIComponent(postalCode)}`;
+      }
     }
 
     submitBtn.addEventListener('click', submitPostalCode);
@@ -246,13 +289,13 @@
     const heroSearchBtn = document.getElementById('heroSearchBtn');
     const heroSearchForm = document.getElementById('heroSearchForm');
     const locationInput = document.getElementById('heroLocationInput');
-    const equipmentInput = document.getElementById('heroEquipmentInput');
+    const equipmentSelect = document.getElementById('heroEquipmentSelect');
     const heroSearchErrorMessage = document.getElementById('heroSearchErrorMessage');
 
     heroSearchBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      const location = locationInput.value.trim().toUpperCase().replace(/\s/g, '');
-      const equipment = equipmentInput.value.trim();
+      const location = locationInput.value.toString().replace(/[^a-z0-9]/gi, '').toUpperCase();
+      const equipmentCategory = equipmentSelect.value;
       
       // Validate postal code - must be provided and valid
       if (!location) {
@@ -272,6 +315,12 @@
         return;
       }
       
+      if (!equipmentCategory) {
+        heroSearchErrorMessage.textContent = 'Please select an equipment category';
+        heroSearchErrorMessage.style.display = 'block';
+        return;
+      }
+      
       // Clear error message on successful validation
       heroSearchErrorMessage.style.display = 'none';
       
@@ -279,26 +328,25 @@
       const params = [];
       
       params.push(`postalCode=${encodeURIComponent(location)}`);
-      if (equipment) {
-        params.push(`search=${encodeURIComponent(equipment)}`);
-      }
+      params.push(`category=${encodeURIComponent(equipmentCategory)}`);
       
       url += params.join('&');
       window.location.href = url;
     });
 
-    // Allow Enter key in search form to submit
-    [locationInput, equipmentInput].forEach(input => {
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          heroSearchBtn.click();
-        }
-      });
-      
-      // Clear error message when user focuses on input
-      input.addEventListener('focus', () => {
-        heroSearchErrorMessage.style.display = 'none';
-      });
+    // Allow Enter key in location input to submit
+    locationInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        heroSearchBtn.click();
+      }
+    });
+
+    // Clear error message when user focuses or changes inputs
+    locationInput.addEventListener('focus', () => {
+      heroSearchErrorMessage.style.display = 'none';
+    });
+    equipmentSelect.addEventListener('change', () => {
+      heroSearchErrorMessage.style.display = 'none';
     });
   </script>
 

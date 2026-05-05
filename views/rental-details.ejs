@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <%- include('partials/canonical') %>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Rent equipment from JC Rentals">
+  <meta name="description" content="<%= equipment.description ? equipment.description : 'Rent equipment from JC Equipment Rentals' %>">
   <title><%= title %></title>
   <link rel="icon" href="/images/Favicon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -40,7 +41,32 @@
         <h2><%= equipment.name %></h2>
         <p><strong>Category:</strong> <%= equipment.category %></p>
         <p><strong>Description:</strong> <%= equipment.description %></p>
-        <p><strong>In Stock:</strong> <%= equipment.quantityAvailable %> / <%= equipment.quantity %></p>
+        <% if (equipment.manufacturer) { %><p><strong>Manufacturer:</strong> <%= equipment.manufacturer %></p><% } %>
+        <% if (equipment.model) { %><p><strong>Model:</strong> <%= equipment.model %></p><% } %>
+        <p><strong>Available:</strong> <%= equipment.quantityAvailable %> of <%= equipment.quantity %></p>
+
+        <!-- Specifications Table -->
+        <% if (equipment.specifications && Object.keys(equipment.specifications || {}).length > 0) { %>
+          <div class="rd-specifications" style="margin-top: 20px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 1.1rem; color: #333; font-weight: 600;">Specifications</h3>
+            <table class="rd-specs-table" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">
+                  <th style="padding: 10px; text-align: left; font-weight: 600; color: #555; width: 40%;">Name</th>
+                  <th style="padding: 10px; text-align: left; font-weight: 600; color: #555;">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% Object.entries(equipment.specifications).forEach(([key, value]) => { %>
+                  <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px; color: #666;"><strong><%= key %></strong></td>
+                    <td style="padding: 10px; color: #333;"><%= value %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
       </div>
 
       <div class="rd-pricing-box">
@@ -150,6 +176,9 @@
           <button type="button" id="completeOrderBtn" class="rd-submit-btn">
             <i class="fas fa-shopping-cart"></i> COMPLETE ORDER
           </button>
+          <a href="tel:6133342571" class="rd-call-btn">
+            <i class="fas fa-phone"></i> CALL NOW TO RENT
+          </a>
         </div>
       </form>
     </div>

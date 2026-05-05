@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="JC Rentals Admin - Equipment Management">
-  <title>Equipment Management - JC Rentals Admin</title>
+  <meta name="description" content="JC Equipment Rentals Admin - Equipment Management">
+  <title>Equipment Management - JC Equipment Rentals Admin</title>
   <link rel="icon" href="/images/Favicon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="/css/admin.css">
@@ -250,11 +250,15 @@
           <div class="filter-options">
             <select id="categoryFilter" onchange="handleFilterChange()">
               <option value="">All Categories</option>
-              <option value="Tools">Tools</option>
-              <option value="Machinery">Machinery</option>
-              <option value="Vehicles">Vehicles</option>
-              <option value="Safety">Safety</option>
-              <option value="Other">Other</option>
+              <option value="Excavators">Excavators</option>
+              <option value="Telehandlers">Telehandlers</option>
+              <option value="Skid Steers">Skid Steers</option>
+              <option value="Boom Lifts">Boom Lifts</option>
+              <option value="Trailers">Trailers</option>
+              <option value="Hydrovac">Hydrovac</option>
+              <option value="Dozers">Dozers</option>
+              <option value="Pumps">Pumps</option>
+              <option value="Marine Equipment">Marine Equipment</option>
             </select>
             <select id="statusFilter" onchange="handleFilterChange()">
               <option value="">All Status</option>
@@ -344,11 +348,15 @@
             <label for="equipCategory">Category *</label>
             <select id="equipCategory" name="category" required>
               <option value="">Select Category</option>
-              <option value="Tools">Tools</option>
-              <option value="Machinery">Machinery</option>
-              <option value="Vehicles">Vehicles</option>
-              <option value="Safety">Safety</option>
-              <option value="Other">Other</option>
+              <option value="Excavators">Excavators</option>
+              <option value="Telehandlers">Telehandlers</option>
+              <option value="Skid Steers">Skid Steers</option>
+              <option value="Boom Lifts">Boom Lifts</option>
+              <option value="Trailers">Trailers</option>
+              <option value="Hydrovac">Hydrovac</option>
+              <option value="Dozers">Dozers</option>
+              <option value="Pumps">Pumps</option>
+              <option value="Marine Equipment">Marine Equipment</option>
             </select>
           </div>
         </div>
@@ -389,6 +397,15 @@
             <label for="equipModel">Model</label>
             <input type="text" id="equipModel" name="model" placeholder="e.g., DCD771C2">
           </div>
+        </div>
+
+        <div class="form-group">
+          <label>Specifications</label>
+          <div id="specsContainer" style="border:1px solid #e5e7eb;padding:10px;border-radius:8px;">
+            <div id="specRows"></div>
+            <button type="button" class="btn-secondary" style="margin-top:8px;" onclick="addSpecRow()">+ Add Specification</button>
+          </div>
+          <small style="color:#6b7280;">Add any key/value specs (e.g. Power, Weight, Voltage).</small>
         </div>
 
         <div class="form-group">
@@ -466,7 +483,7 @@
             <div class="card-details">
               <p><strong>Category:</strong> ${item.category}</p>
               <p><strong>Daily Rate:</strong> $${item.dailyRate.toFixed(2)}</p>
-              <p><strong>Stock:</strong> ${item.quantity} | <strong>Available:</strong> ${item.quantityAvailable}</p>
+              <p><strong>Stock:</strong> ${item.quantity} | <strong>Available:</strong> <input type="number" class="available-input" data-id="${item._id}" value="${item.quantityAvailable}" min="0" max="${item.quantity}" style="width:50px;padding:4px;border:1px solid #ccc;border-radius:4px;" onchange="updateAvailability('${item._id}', this.value)"></p>
               <p><strong>Status:</strong> <span class="status-badge ${item.quantityAvailable > 0 ? 'available' : 'rented'}">${item.quantityAvailable > 0 ? 'Available' : 'Rented'}</span></p>
             </div>
             <div class="card-actions">
@@ -544,6 +561,27 @@
             <label>Status:</label>
             <span class="status-badge ${item.quantityAvailable > 0 ? 'available' : 'rented'}">${item.quantityAvailable > 0 ? 'available' : 'rented'}</span>
           </div>
+          ${item.specifications && Object.keys(item.specifications || {}).length > 0 ? `
+            <div style="margin-top:16px;">
+              <h4 style="margin:0 0 8px 0; font-size:1rem;">Specifications</h4>
+              <table style="width:100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="text-align:left; border-bottom:1px solid #e5e7eb;">
+                    <th style="padding:8px; font-size:0.9rem; color:#374151; width:40%;">Name</th>
+                    <th style="padding:8px; font-size:0.9rem; color:#374151;">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${Object.entries(item.specifications).map(([k,v]) => `
+                    <tr>
+                      <td style="padding:8px; border-bottom:1px solid #f3f4f6;">${k}</td>
+                      <td style="padding:8px; border-bottom:1px solid #f3f4f6;">${v}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : ''}
         </div>
       `;
       document.getElementById('equipmentModal').classList.add('active');
@@ -654,6 +692,10 @@
       submitBtn.textContent = 'Add Equipment';
       previewContainer.style.display = 'none';
       document.getElementById('equipImage').required = true;
+      // Reset specifications area
+      renderSpecsFromObject({});
+      // Add an initial empty spec row to guide the user
+      addSpecRow();
       
       if (modal) modal.classList.add('active');
     }
@@ -700,6 +742,10 @@
       submitBtn.textContent = 'Update Equipment';
       
       if (modal) modal.classList.add('active');
+
+      // Populate specifications (expect object or map)
+      const specsObj = item.specifications || {};
+      renderSpecsFromObject(specsObj);
     }
 
     // Close modal by clicking close button
@@ -728,6 +774,35 @@
       }
     }
 
+    // ===== Specifications helpers =====
+    function addSpecRow(key = '', value = '') {
+      const rows = document.getElementById('specRows');
+      const id = 'spec-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+      const div = document.createElement('div');
+      div.className = 'spec-row';
+      div.style.display = 'flex';
+      div.style.gap = '8px';
+      div.style.marginBottom = '8px';
+      div.innerHTML = `
+        <input type="text" name="specKey[]" placeholder="Name (e.g., Power)" value="${key}" style="flex:1;padding:8px;border:1px solid #e5e7eb;border-radius:6px;">
+        <input type="text" name="specValue[]" placeholder="Value (e.g., 120V, 5kg)" value="${value}" style="flex:1;padding:8px;border:1px solid #e5e7eb;border-radius:6px;">
+        <button type="button" class="btn-secondary" style="padding:6px 8px;" onclick="this.closest('.spec-row').remove()">Remove</button>
+      `;
+      rows.appendChild(div);
+    }
+
+    function renderSpecsFromObject(obj) {
+      const rows = document.getElementById('specRows');
+      rows.innerHTML = '';
+      if (!obj) return;
+      // If Map-like (object), convert
+      const entries = Array.isArray(obj) ? obj : Object.entries(obj || {});
+      // If entries are [k,v] pairs
+      if (Array.isArray(entries) && entries.length > 0 && Array.isArray(entries[0])) {
+        entries.forEach(([k,v]) => addSpecRow(k, v));
+      }
+    }
+
     // Handle Equipment Form Submission
     const equipmentForm = document.getElementById('equipmentForm');
     if (equipmentForm) {
@@ -744,7 +819,23 @@
         const isEdit = !!equipmentId;
         
         try {
-          const formData = new FormData(equipmentForm);
+              const formData = new FormData(equipmentForm);
+
+              // Collect specifications from rows and append as JSON
+              try {
+                const specKeys = Array.from(document.getElementsByName('specKey[]')).map(i => i.value.trim()).filter(Boolean);
+                const specValues = Array.from(document.getElementsByName('specValue[]')).map(i => i.value.trim());
+                const specs = {};
+                for (let i = 0; i < specKeys.length; i++) {
+                  const k = specKeys[i];
+                  const v = specValues[i] || '';
+                  if (k) specs[k] = v;
+                }
+                formData.set('specs', JSON.stringify(specs));
+                console.log('Specs appended to FormData:', specs);
+              } catch (err) {
+                console.warn('Specs collect error:', err);
+              }
           
           // Log form data
           console.log('Form data:');
@@ -799,6 +890,40 @@
       });
     } else {
       console.error('Equipment form not found!');
+    }
+
+    // Update availability quantity
+    async function updateAvailability(equipmentId, newAvailability) {
+      try {
+        const response = await fetch(`/admin/api/equipment/${equipmentId}/availability`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantityAvailable: parseInt(newAvailability) })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          // Update the local data
+          const equipment = equipmentData.find(e => e._id === equipmentId);
+          if (equipment) {
+            equipment.quantityAvailable = parseInt(newAvailability);
+          }
+          
+          // Show success notification
+          const successMsg = document.createElement('div');
+          successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 12px 16px; border-radius: 5px; z-index: 10000; font-weight: 600; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+          successMsg.textContent = '✓ Availability updated';
+          document.body.appendChild(successMsg);
+          setTimeout(() => successMsg.remove(), 2000);
+        } else {
+          alert('Error updating availability: ' + (data.message || 'Unknown error'));
+          renderEquipment();
+        }
+      } catch (err) {
+        console.error('Error updating availability:', err);
+        alert('Error: ' + err.message);
+        renderEquipment();
+      }
     }
 
     // Initial render

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <%- include('partials/canonical') %>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Browse our complete catalog of equipment rentals including scissor lifts, boom lifts, forklifts, and more.">
@@ -19,10 +20,14 @@
   <!-- Hero Section -->
   <section class="equipment-hero">
     <div>
-      <h1>Equipment Catalog</h1>
-      <p>Browse Our Complete Rental Inventory</p>
-    </div>
-  </section>
+        <h1>Ontario Equipment Rentals</h1>
+        <p>Browse our complete rental inventory across Eastern Ontario.</p>
+        <div class="hero-hero-subtitle">
+          Heavy Equipment Rentals in Gilmour<br>
+          Fast & Free Delivery in Gilmour & Surrounding Areas<br>
+          📞 Call <a href="tel:613-334-2571">613-334-2571</a> to reserve today
+        </div>
+      </section>
 
   <!-- Main Catalog -->
   <main class="equipment-catalog">
@@ -44,7 +49,7 @@
                     <div class="equipment-card">
                       <div class="equipment-card-image">
                         <% if (item.image) { %>
-                          <img src="<%= item.image %>" alt="<%= item.name %>" style="width: 100%; height: 200px; object-fit: cover;">
+                          <img src="<%= item.image %>" alt="<%= item.name %>">
                         <% } else { %>
                           <i class="fas fa-tools" style="font-size: 48px; color: #ccc;"></i>
                         <% } %>
@@ -57,7 +62,7 @@
                         </div>
                         <div class="equipment-price">From $<%= item.dailyRate %>/day</div>
                         <div class="equipment-card-footer">
-                          <a class="btn-quote" href="/equipment/<%= item._id %>/rent">Rent Now</a>
+                          <a class="btn-quote" href="/equipment/<%= item.slug %>">View Details</a>
                         </div>
                       </div>
                     </div>
@@ -115,6 +120,17 @@
         }
       });
     });
+
+    // Auto-expand category when arriving from home search with a category query
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedCategory = urlParams.get('category');
+    if (selectedCategory) {
+      const selectedHeader = document.querySelector(`.category-accordion-header[data-category="${selectedCategory}"]`);
+      if (selectedHeader) {
+        selectedHeader.click();
+        selectedHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
   </script>
 
 

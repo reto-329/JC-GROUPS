@@ -4,10 +4,11 @@
     <!-- Company Info -->
     <div class="footer-section footer-company-info">
       <div class="footer-logo">
-        <img src="/images/LOGO.jpeg" alt="JC Rentals Logo">
+        <img src="/images/LOGO.jpeg" alt="JC Equipment Rentals Logo">
       </div>
       <p class="address">22127 Highway 62,<br>Gilmour, ON Canada</p>
-      <p class="hours"><span>Mon-Fri:</span> 7am – 5pm<br><span>Sat-Sun:</span> Closed</p>
+      <p class="service-area">Serving Gilmour, Bancroft, Madoc, and surrounding Ontario areas</p>
+      <p class="hours"><span>Mon - Sun:</span> 7am – 7pm</p>
     </div>
 
     <!-- Quick Links -->
@@ -15,7 +16,11 @@
       <h4>Quick Links</h4>
       <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="/profile">My Account</a></li>
+        <% if (isLoggedIn) { %>
+          <li><a href="/profile">My Account</a></li>
+        <% } else { %>
+          <li><a href="/login">Login</a></li>
+        <% } %>
         <li><a href="/about">About Us</a></li>
         <li><a href="/faq">FAQ</a></li>
       </ul>
@@ -43,8 +48,7 @@
   <!-- Bottom Bar -->
   <div class="footer-bottom">
     <p class="footer-copyright">
-      JC Contracting Group © 2026. All Rights Reserved. Website Design by <a href="#" class="fuller-design-link">RETO TECH™</a>
-      <a href="/admin/login" class="admin-portal-link" title="Admin Portal"> | Admin</a>
+      JC Equipment Rental © 2026. All Rights Reserved. Website Design by <a href="#" class="fuller-design-link">RETO TECH™</a>
     </p>
     <div class="footer-bottom-right">
       <div class="footer-social-icons">

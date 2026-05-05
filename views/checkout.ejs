@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <%- include('partials/canonical') %>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Secure Checkout - JC Rentals">
-  <title>Checkout - JC Rentals</title>
+  <meta name="description" content="Secure Checkout - JC Equipment Rentals">
+  <title>Checkout - JC Equipment Rentals</title>
   <link rel="icon" href="/images/Favicon.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link rel="stylesheet" href="/css/index.css">
@@ -326,7 +327,7 @@
     <div class="step-indicator">
       <div class="step active">
         <div class="step-number">1</div>
-        <div class="step-label">Delivery Address</div>
+        <div class="step-label">Shipping Address</div>
       </div>
       <div class="step">
         <div class="step-number">2</div>
@@ -344,10 +345,10 @@
         <div id="alertMessage" class="alert"></div>
 
         <form id="checkoutForm">
-          <!-- Delivery Address Section -->
+          <!-- Shipping Address Section -->
           <div id="deliverySection">
             <h2 class="form-section-title">
-              <i class="fas fa-map-marker-alt"></i> Delivery Address
+              <i class="fas fa-map-marker-alt"></i> Shipping Address
             </h2>
 
             <div class="form-group">
@@ -427,71 +428,59 @@
             </div>
           </div>
 
-          <!-- Payment Section -->
-          <div id="paymentSection" style="margin-top: 40px;">
+          <!-- Billing Address Section -->
+          <div id="billingSection" style="margin-top: 40px;">
             <h2 class="form-section-title">
-              <i class="fas fa-credit-card"></i> Payment Information
+              <i class="fas fa-file-invoice-dollar"></i> Billing Address
             </h2>
 
-            <div class="form-group">
-              <label>Cardholder Name <span style="color: #dc3545;">*</span></label>
-              <input type="text" name="cardholderName" placeholder="John Doe" required>
-            </div>
-
-            <div class="form-group">
-              <label>Card Number <span style="color: #dc3545;">*</span></label>
+            <div class="form-group" style="display: flex; align-items: center; gap: 12px;">
               <input 
-                type="text" 
-                name="cardNumber" 
-                id="cardNumber"
-                placeholder="1234 5678 9012 3456" 
-                maxlength="19"
-                pattern="[0-9\s]{13,19}"
-                required
+                type="checkbox" 
+                id="useSameAddress" 
+                name="useSameAddress"
+                checked
+                style="width: auto; height: 18px; width: 18px; cursor: pointer;"
               >
+              <label style="margin: 0; cursor: pointer; font-weight: 500;">
+                Use same address as shipping
+              </label>
             </div>
 
-            <div class="form-row">
+            <!-- Billing Address Form (hidden by default) -->
+            <div id="billingAddressForm" style="display: none; margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 6px; border-left: 4px solid #ffc107;">
               <div class="form-group">
-                <label>Expiry Date <span style="color: #dc3545;">*</span></label>
-                <input 
-                  type="text" 
-                  name="expiry" 
-                  id="expiry"
-                  placeholder="MM/YY" 
-                  maxlength="5"
-                  pattern="[0-9]{2}/[0-9]{2}"
-                  required
-                >
+                <label>Full Name <span style="color: #dc3545;">*</span></label>
+                <input type="text" name="billingFullName" placeholder="Enter full name">
               </div>
+
               <div class="form-group">
-                <label>CVV <span style="color: #dc3545;">*</span></label>
-                <input 
-                  type="text" 
-                  name="cvv" 
-                  id="cvv"
-                  placeholder="123" 
-                  maxlength="4"
-                  pattern="[0-9]{3,4}"
-                  required
-                >
+                <label>Street Address <span style="color: #dc3545;">*</span></label>
+                <input type="text" name="billingStreet" placeholder="123 Main St">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>City <span style="color: #dc3545;">*</span></label>
+                  <input type="text" name="billingCity">
+                </div>
+                <div class="form-group">
+                  <label>Province/State <span style="color: #dc3545;">*</span></label>
+                  <input type="text" name="billingState" value="ON">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Postal Code <span style="color: #dc3545;">*</span></label>
+                  <input type="text" name="billingPostalCode" placeholder="Postal Code">
+                </div>
+                <div class="form-group">
+                  <label>Country <span style="color: #dc3545;">*</span></label>
+                  <input type="text" name="billingCountry" value="Canada" disabled>
+                </div>
               </div>
             </div>
-
-            <div class="security-info">
-              <i class="fas fa-shield-alt"></i>
-              <span>Your payment information is encrypted and secure. We never store full card details.</span>
-            </div>
-
-            <!-- Test Card Info (visible in development) -->
-            <% if (monerisEnvironment === 'test') { %>
-              <div class="test-card-info">
-                <strong><i class="fas fa-flask"></i> TEST MODE - Use Test Cards:</strong>
-                <p><strong>Valid Card:</strong> 4111 1111 1111 1111</p>
-                <p><strong>Declined Card:</strong> 4222 2222 2222 2220</p>
-                <p>Expiry: Any future date | CVV: Any 3 digits</p>
-              </div>
-            <% } %>
           </div>
 
           <!-- Terms Agreement -->
@@ -510,7 +499,7 @@
           <button type="submit" class="btn-payment">
             <span class="loading-spinner" id="loadingSpinner"></span>
             <span id="paymentBtnText">
-              <i class="fas fa-lock"></i> Complete Payment
+              <i class="fas fa-credit-card"></i> Continue to Secure Payment
             </span>
           </button>
         </form>
@@ -607,15 +596,13 @@
     // Validate postal code and update delivery fee
     document.getElementById('postalCode').addEventListener('change', function() {
       const warningDiv = document.getElementById('postalCodeWarning');
-      
+
       if (!this.value) {
         warningDiv.style.display = 'block';
         warningDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span id="warningMessage">Please select a delivery area</span>';
-        // Reset to 0 fee if no selection
         updatePricing(0);
       } else {
         warningDiv.style.display = 'none';
-        // Find the selected service area and get its delivery fee
         const selectedArea = serviceAreas.find(area => area.postalCode === this.value);
         if (selectedArea) {
           updatePricing(selectedArea.deliveryFee);
@@ -623,24 +610,31 @@
       }
     });
 
-    // Format card number with spaces
-    document.getElementById('cardNumber').addEventListener('input', function() {
-      let value = this.value.replace(/\s/g, '');
-      this.value = value.replace(/(\d{4})/g, '$1 ').trim();
-    });
+    const useSameAddressCheckbox = document.getElementById('useSameAddress');
+    const billingAddressForm = document.getElementById('billingAddressForm');
+    const billingInputs = billingAddressForm.querySelectorAll('input[name^="billing"]');
 
-    // Format expiry date
-    document.getElementById('expiry').addEventListener('input', function() {
-      let value = this.value.replace(/\D/g, '');
-      if (value.length >= 2) {
-        value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    useSameAddressCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        // Hide billing form and clear fields
+        billingAddressForm.style.display = 'none';
+        billingInputs.forEach(input => input.value = '');
+        // Copy values from shipping form (optional for display purposes)
+      } else {
+        // Show billing form
+        billingAddressForm.style.display = 'block';
+        // Auto-populate with shipping address values for convenience
+        document.querySelector('input[name="billingFullName"]').value = 
+          document.querySelector('input[name="fullName"]').value;
+        document.querySelector('input[name="billingStreet"]').value = 
+          document.querySelector('input[name="street"]').value;
+        document.querySelector('input[name="billingCity"]').value = 
+          document.querySelector('input[name="city"]').value;
+        document.querySelector('input[name="billingState"]').value = 
+          document.querySelector('input[name="state"]').value;
+        document.querySelector('input[name="billingPostalCode"]').value = 
+          document.querySelector('input[name="postalCode"]').value;
       }
-      this.value = value;
-    });
-
-    // CVV input - numbers only
-    document.getElementById('cvv').addEventListener('input', function() {
-      this.value = this.value.replace(/\D/g, '');
     });
 
     // Form submission
@@ -657,10 +651,23 @@
         return;
       }
 
+      // Validate billing address if using different address
+      const useSameAddress = document.getElementById('useSameAddress').checked;
+      if (!useSameAddress) {
+        const billingStreet = document.querySelector('input[name="billingStreet"]').value.trim();
+        const billingCity = document.querySelector('input[name="billingCity"]').value.trim();
+        const billingState = document.querySelector('input[name="billingState"]').value.trim();
+        const billingPostalCode = document.querySelector('input[name="billingPostalCode"]').value.trim();
+
+        if (!billingStreet || !billingCity || !billingState || !billingPostalCode) {
+          showAlert('Please fill in all billing address fields', 'error');
+          return;
+        }
+      }
+
       const btn = document.querySelector('.btn-payment');
       const spinner = document.getElementById('loadingSpinner');
       const btnText = document.getElementById('paymentBtnText');
-      const alertDiv = document.getElementById('alertMessage');
 
       // Disable button and show loading state
       btn.disabled = true;
@@ -670,49 +677,70 @@
       try {
         // Parse form data
         const formData = new FormData(this);
-        const expiry = formData.get('expiry').split('/');
+        const useSameAddress = document.getElementById('useSameAddress').checked;
 
-        const paymentData = {
-          cardNumber: formData.get('cardNumber').replace(/\s/g, ''),
-          expiryMonth: expiry[0],
-          expiryYear: '20' + expiry[1],
-          cvv: formData.get('cvv'),
-          deliveryAddress: {
-            street: formData.get('street'),
-            city: formData.get('city'),
-            state: formData.get('state'),
-            zipCode: formData.get('postalCode')
-          }
+        // Build delivery address
+        const deliveryAddress = {
+          fullName: formData.get('fullName'),
+          street: formData.get('street'),
+          city: formData.get('city'),
+          state: formData.get('state'),
+          zipCode: formData.get('postalCode')
         };
 
-        // Send payment request
+        // Build billing address
+        let billingAddress = null;
+        if (useSameAddress) {
+          // Use same as shipping
+          billingAddress = { ...deliveryAddress };
+        } else {
+          // Use different billing address
+          billingAddress = {
+            fullName: formData.get('billingFullName') || formData.get('fullName'),
+            street: formData.get('billingStreet'),
+            city: formData.get('billingCity'),
+            state: formData.get('billingState'),
+            zipCode: formData.get('billingPostalCode')
+          };
+        }
+
+        // Send address data to backend for order processing
+        const orderData = {
+          deliveryAddress: deliveryAddress,
+          billingAddress: billingAddress,
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          fullName: formData.get('fullName')
+        };
+
+        // Send order request
         const response = await fetch('/api/checkout/process-payment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(paymentData)
+          body: JSON.stringify(orderData)
         });
 
         const result = await response.json();
 
         if (result.success) {
           // Show success message
-          showAlert(`Payment successful! Order #${result.orderNumber}`, 'success');
+          showAlert(`Order placed successfully! Order #${result.orderNumber}`, 'success');
           
           // Redirect to confirmation page after 2 seconds
           setTimeout(() => {
             window.location.href = `/checkout/confirmation/${result.orderId}`;
           }, 2000);
         } else {
-          showAlert(result.message || 'Payment failed', 'error');
+          showAlert(result.message || 'Order failed', 'error');
           btn.disabled = false;
           spinner.style.display = 'none';
           btnText.style.display = 'inline-flex';
         }
       } catch (err) {
-        console.error('Payment error:', err);
-        showAlert('Error processing payment: ' + err.message, 'error');
+        console.error('Order error:', err);
+        showAlert('Error placing order: ' + err.message, 'error');
         btn.disabled = false;
         spinner.style.display = 'none';
         btnText.style.display = 'inline-flex';
